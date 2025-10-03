@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COP30 - Análise de Redes Sociais</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>COP30 - Monitoramento de Redes Sociais</h1>
+            <p>Sistema de análise e visualização de dados sobre COP30 no Instagram e TikTok</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Dashboard de Métricas -->
+        <section id="dashboard">
+            <h2>Dashboard de Métricas</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Total de Posts</h3>
+                    <p class="metric-value" id="total-posts">-</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Usuários Únicos</h3>
+                    <p class="metric-value" id="unique-users">-</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Média de Likes</h3>
+                    <p class="metric-value" id="avg-likes">-</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Última Coleta</h3>
+                    <p class="metric-value" id="last-collection">-</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline de Posts -->
+        <section id="timeline-section">
+            <h2>Timeline de Posts</h2>
+            <div class="filters">
+                <select id="platform-filter">
+                    <option value="">Todas as plataformas</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="tiktok">TikTok</option>
+                </select>
+            </div>
+            <div id="timeline-chart"></div>
+        </section>
+
+        <!-- Nuvem de Hashtags -->
+        <section id="hashtags-section">
+            <h2>Hashtags Mais Usadas</h2>
+            <div id="hashtag-cloud"></div>
+        </section>
+
+        <!-- Top Posts -->
+        <section id="top-posts-section">
+            <h2>Posts com Maior Engajamento</h2>
+            <div class="filters">
+                <select id="metric-filter">
+                    <option value="likes_count">Likes</option>
+                    <option value="comments_count">Comentários</option>
+                    <option value="shares_count">Compartilhamentos</option>
+                </select>
+            </div>
+            <div id="top-posts-chart"></div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 VICTOR GOIS DE OLIVEIRA PACHECO LTDA - Projeto COP30</p>
+        </div>
+    </footer>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/visualizations/timeline.js"></script>
+    <script src="js/visualizations/hashtag-cloud.js"></script>
+    <script src="js/visualizations/engagement.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
