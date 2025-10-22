@@ -6,7 +6,7 @@ module.exports = {
 
   // Actors utilizados
   actors: {
-    instagram: 'apify/instagram-search-scraper',  // Não requer login
+    instagram: 'apify/instagram-hashtag-scraper',  // Scraper de hashtags do Instagram
     tiktok: 'clockworks/tiktok-scraper'
   },
 

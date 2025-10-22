@@ -6,14 +6,14 @@
  * Processa dados do Instagram
  */
 function processInstagramPost(item, keyword) {
-  // Instagram Search Scraper retorna formato diferente
-  // Tenta múltiplos campos possíveis
+  // Instagram Hashtag Scraper retorna formato padronizado
+  // Campos principais: id, shortCode, caption, hashtags, timestamp, ownerUsername, etc.
 
   // Parse timestamp de forma segura
   let createdAt = null;
   try {
     if (item.timestamp) {
-      // Pode ser string ISO ou número Unix
+      // timestamp vem como string ISO ou número Unix
       if (typeof item.timestamp === 'string') {
         const parsed = new Date(item.timestamp);
         if (!isNaN(parsed.getTime())) {
@@ -22,34 +22,60 @@ function processInstagramPost(item, keyword) {
       } else if (!isNaN(item.timestamp)) {
         createdAt = new Date(item.timestamp * 1000);
       }
-    } else if (item.taken_at && !isNaN(item.taken_at)) {
-      createdAt = new Date(item.taken_at * 1000);
-    } else if (item.timestampPostDate) {
-      const parsed = new Date(item.timestampPostDate);
-      if (!isNaN(parsed.getTime())) {
-        createdAt = parsed;
-      }
     }
   } catch (e) {
     // Se falhar, deixa null
   }
 
+  // Extrair hashtags: primeiro tenta usar o campo hashtags do scraper,
+  // depois extrai do caption como fallback
+  let hashtags = [];
+  if (item.hashtags && Array.isArray(item.hashtags) && item.hashtags.length > 0) {
+    hashtags = item.hashtags.map(tag => tag.toLowerCase());
+  } else {
+    hashtags = extractHashtags(item.caption || '');
+  }
+
+  // Determinar tipo de mídia
+  let mediaType = 'photo'; // padrão
+  if (item.type) {
+    mediaType = item.type;
+  } else if (item.productType === 'clips') {
+    mediaType = 'video';
+  } else if (item.displayUrl && item.displayUrl.includes('video')) {
+    mediaType = 'video';
+  }
+
+  // Coletar URLs de mídia
+  const mediaUrls = [];
+  if (item.displayUrl) {
+    mediaUrls.push(item.displayUrl);
+  }
+  // Se tiver posts filhos (carousel), adicionar também
+  if (item.childPosts && Array.isArray(item.childPosts)) {
+    item.childPosts.forEach(child => {
+      if (child.displayUrl) {
+        mediaUrls.push(child.displayUrl);
+      }
+    });
+  }
+
   return {
     platform: 'instagram',
-    post_id: item.id || item.shortCode || item.pk || item.code,
-    username: item.ownerUsername || item.username || item.owner?.username,
-    user_id: item.ownerId || item.owner?.id || item.user?.pk,
-    caption: item.caption || item.text || item.edge_media_to_caption?.edges?.[0]?.node?.text || '',
-    hashtags: extractHashtags(item.caption || item.text || ''),
+    post_id: item.id || item.shortCode,
+    username: item.ownerUsername,
+    user_id: item.ownerId,
+    caption: item.caption || '',
+    hashtags: hashtags,
     keyword_matched: keyword,
     created_at: createdAt,
-    likes_count: item.likesCount || item.like_count || item.edge_liked_by?.count || 0,
-    comments_count: item.commentsCount || item.comment_count || item.edge_media_to_comment?.count || 0,
+    likes_count: item.likesCount || 0,
+    comments_count: item.commentsCount || 0,
     shares_count: null, // Instagram não fornece shares públicos
-    views_count: item.videoViewCount || item.video_view_count || item.play_count || null,
-    post_url: item.url || item.link || (item.shortCode ? `https://www.instagram.com/p/${item.shortCode}/` : null),
-    media_urls: item.displayUrl ? [item.displayUrl] : (item.image_versions2?.candidates?.[0]?.url ? [item.image_versions2.candidates[0].url] : []),
-    media_type: item.type || item.media_type || (item.video_versions ? 'video' : 'photo'),
+    views_count: null, // Instagram Hashtag Scraper não retorna views
+    post_url: item.url || (item.shortCode ? `https://www.instagram.com/p/${item.shortCode}/` : null),
+    media_urls: mediaUrls,
+    media_type: mediaType,
     raw_data: item
   };
 }
@@ -71,13 +97,32 @@ function processTikTokPost(item, keyword) {
     mediaUrls.push(item.videoUrl);
   }
 
+  // Processar hashtags do TikTok
+  let hashtags = [];
+  if (item.hashtags && Array.isArray(item.hashtags)) {
+    // Hashtags vem como array de objetos: [{"name":"fyp"}, {"name":"viral"}]
+    hashtags = item.hashtags
+      .map(h => {
+        if (typeof h === 'object' && h.name) {
+          return h.name.toLowerCase();
+        } else if (typeof h === 'string') {
+          return h.toLowerCase();
+        }
+        return null;
+      })
+      .filter(h => h !== null);
+  } else {
+    // Fallback: extrair do texto
+    hashtags = extractHashtags(item.text);
+  }
+
   return {
     platform: 'tiktok',
     post_id: item.id,
     username: item.authorMeta?.name || item.author,
     user_id: item.authorMeta?.id,
     caption: item.text || '',
-    hashtags: item.hashtags || extractHashtags(item.text),
+    hashtags: hashtags,
     keyword_matched: keyword,
     created_at: item.createTime ? new Date(item.createTime * 1000) : null,
     likes_count: item.diggCount || item.stats?.diggCount || 0,

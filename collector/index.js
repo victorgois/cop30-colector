@@ -53,10 +53,8 @@ async function collectData(platform, keyword) {
 
     if (platform === 'instagram') {
       input = {
-        search: `#${keyword}`,  // Busca por hashtag
-        resultsLimit: collection.maxPostsPerHashtag,
-        searchType: 'hashtag',
-        addParentData: false
+        hashtags: [keyword],  // Array de hashtags sem o #
+        resultsLimit: collection.maxPostsPerHashtag
       };
     } else if (platform === 'tiktok') {
       input = {
@@ -80,19 +78,8 @@ async function collectData(platform, keyword) {
 
     logger.info(`Itens retornados: ${items.length} para ${platform} - #${keyword}`);
 
-    // Para Instagram Search Scraper, extrair posts dos resultados aninhados
-    let posts = items;
-    if (platform === 'instagram' && items.length > 0 && items[0].topPosts) {
-      posts = [];
-      for (const hashtag of items) {
-        if (hashtag.topPosts) posts.push(...hashtag.topPosts);
-        if (hashtag.latestPosts) posts.push(...hashtag.latestPosts);
-      }
-      logger.info(`Posts extraídos: ${posts.length} de ${items.length} hashtags relacionadas`);
-    }
-
     // Processa e salva os dados no banco
-    const processResult = processBatch(posts, platform, keyword);
+    const processResult = processBatch(items, platform, keyword);
     logger.info(`Posts processados: ${processResult.success}/${processResult.total} (${processResult.failed} erros)`);
 
     let savedCount = 0;
