@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste URLs Instagram</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        img {
+            max-width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste de Carregamento de URLs do Instagram</h1>
+    <p>Este teste verifica se as URLs do Instagram carregam corretamente.</p>
+
+    <div id="test-results"></div>
+
+    <script>
+        async function testInstagramURLs() {
+            const container = document.getElementById('test-results');
+
+            try {
+                // Buscar posts do Instagram via API
+                const response = await fetch('/api/posts?platform=instagram&limit=3');
+                const posts = await response.json();
+
+                console.log('Posts recebidos:', posts);
+
+                posts.forEach((post, index) => {
+                    const testDiv = document.createElement('div');
+                    testDiv.className = 'test-container';
+
+                    const title = document.createElement('h3');
+                    title.textContent = `Post ${index + 1}: @${post.username}`;
+                    testDiv.appendChild(title);
+
+                    const info = document.createElement('div');
+                    info.innerHTML = `
+                        <strong>Type:</strong> ${post.media_type}<br>
+                        <strong>Post URL:</strong> <a href="${post.post_url}" target="_blank">Ver no Instagram</a><br>
+                        <strong>Media URLs:</strong> ${post.media_urls ? post.media_urls.length : 0} URL(s)
+                    `;
+                    testDiv.appendChild(info);
+
+                    if (post.media_urls && post.media_urls.length > 0) {
+                        const mediaUrl = post.media_urls[0];
+
+                        const urlDisplay = document.createElement('div');
+                        urlDisplay.className = 'status';
+                        urlDisplay.innerHTML = `<strong>URL:</strong> ${mediaUrl.substring(0, 100)}...`;
+                        testDiv.appendChild(urlDisplay);
+
+                        const statusDiv = document.createElement('div');
+                        statusDiv.className = 'status';
+                        statusDiv.textContent = 'Carregando...';
+                        testDiv.appendChild(statusDiv);
+
+                        const img = document.createElement('img');
+                        img.src = mediaUrl;
+
+                        img.onload = function() {
+                            statusDiv.className = 'status success';
+                            statusDiv.textContent = '✅ Imagem carregada com sucesso!';
+                        };
+
+                        img.onerror = function(e) {
+                            statusDiv.className = 'status error';
+                            statusDiv.textContent = '❌ Falha ao carregar imagem (provavelmente CORS ou URL expirada)';
+                            console.error('Erro ao carregar:', mediaUrl, e);
+                        };
+
+                        testDiv.appendChild(img);
+                    } else {
+                        const noMedia = document.createElement('div');
+                        noMedia.className = 'status error';
+                        noMedia.textContent = '❌ Nenhuma URL de mídia disponível';
+                        testDiv.appendChild(noMedia);
+                    }
+
+                    container.appendChild(testDiv);
+                });
+
+            } catch (error) {
+                container.innerHTML = `<div class="error">Erro ao buscar posts: ${error.message}</div>`;
+                console.error('Erro:', error);
+            }
+        }
+
+        // Executar teste quando página carregar
+        window.addEventListener('DOMContentLoaded', testInstagramURLs);
+    </script>
+</body>
+</html>

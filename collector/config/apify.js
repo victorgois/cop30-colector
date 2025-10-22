@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
 module.exports = {
   // Configuração de autenticação
@@ -6,7 +6,7 @@ module.exports = {
 
   // Actors utilizados
   actors: {
-    instagram: 'apify/instagram-scraper',
+    instagram: 'apify/instagram-search-scraper',  // Não requer login
     tiktok: 'clockworks/tiktok-scraper'
   },
 

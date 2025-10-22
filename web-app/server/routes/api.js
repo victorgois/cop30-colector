@@ -108,4 +108,33 @@ router.get('/users/influential', async (req, res) => {
   }
 });
 
+// GET /api/hashtag-network - Rede de co-ocorrências de hashtags
+router.get('/hashtag-network', async (req, res) => {
+  try {
+    const { minCoOccurrence } = req.query;
+
+    const links = await postsQuery.getHashtagNetwork(parseInt(minCoOccurrence) || 3);
+    const nodes = await postsQuery.getHashtagStats(50);
+
+    res.json({
+      nodes: nodes.map(n => ({
+        id: n.hashtag,
+        name: n.hashtag,
+        value: parseInt(n.usage_count),
+        engagement: parseInt(n.total_engagement || 0),
+        platforms: n.platforms
+      })),
+      links: links.map(l => ({
+        source: l.source,
+        target: l.target,
+        value: parseInt(l.weight),
+        platforms: l.platforms
+      }))
+    });
+  } catch (error) {
+    console.error('Erro ao buscar rede de hashtags:', error);
+    res.status(500).json({ error: 'Erro ao buscar rede de hashtags' });
+  }
+});
+
 module.exports = router;

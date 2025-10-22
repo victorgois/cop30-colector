@@ -16,9 +16,9 @@ function renderTimeline(data) {
   const height = 400 - margin.top - margin.bottom;
 
   // Processar dados
-  const parseDate = d3.timeParse('%Y-%m-%d');
+  // A API retorna datas em formato ISO (YYYY-MM-DDTHH:MM:SS.sssZ)
   data.forEach(d => {
-    d.date = parseDate(d.date);
+    d.date = new Date(d.date);
     d.posts_count = +d.posts_count;
   });
 

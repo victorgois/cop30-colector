@@ -52,5 +52,13 @@ const apiClient = {
     const response = await fetch(`${API_BASE_URL}/users/influential?${params}`);
     if (!response.ok) throw new Error('Erro ao buscar usuários influentes');
     return response.json();
+  },
+
+  // Buscar rede de hashtags
+  async getHashtagNetwork(minCoOccurrence = 3) {
+    const params = new URLSearchParams({ minCoOccurrence });
+    const response = await fetch(`${API_BASE_URL}/hashtag-network?${params}`);
+    if (!response.ok) throw new Error('Erro ao buscar rede de hashtags');
+    return response.json();
   }
 };

@@ -137,6 +137,56 @@ class PostsQuery {
     const result = await this.pool.query(query, [postId]);
     return result.rows.length > 0;
   }
+
+  // Buscar co-ocorrências de hashtags (hashtags que aparecem juntas)
+  async getHashtagNetwork(minCoOccurrence = 3) {
+    const query = `
+      WITH hashtag_pairs AS (
+        SELECT
+          h1.hashtag as source,
+          h2.hashtag as target,
+          COUNT(*) as co_occurrence,
+          ARRAY_AGG(DISTINCT p.platform) as platforms
+        FROM posts p,
+        LATERAL unnest(p.hashtags) h1(hashtag),
+        LATERAL unnest(p.hashtags) h2(hashtag)
+        WHERE h1.hashtag < h2.hashtag  -- Evita duplicatas (A-B e B-A)
+        AND array_length(p.hashtags, 1) > 1  -- Posts com mais de 1 hashtag
+        GROUP BY h1.hashtag, h2.hashtag
+        HAVING COUNT(*) >= $1  -- Mínimo de co-ocorrências
+      )
+      SELECT
+        source,
+        target,
+        co_occurrence as weight,
+        platforms
+      FROM hashtag_pairs
+      ORDER BY co_occurrence DESC
+      LIMIT 100;
+    `;
+
+    const result = await this.pool.query(query, [minCoOccurrence]);
+    return result.rows;
+  }
+
+  // Buscar estatísticas de hashtags individuais para o grafo
+  async getHashtagStats(limit = 50) {
+    const query = `
+      SELECT
+        hashtag,
+        SUM(usage_count::bigint) as usage_count,
+        ARRAY_AGG(DISTINCT platform) as platforms,
+        SUM(usage_count::bigint) as total_engagement
+      FROM top_hashtags
+      GROUP BY hashtag
+      HAVING SUM(usage_count::bigint) >= 3
+      ORDER BY SUM(usage_count::bigint) DESC
+      LIMIT $1
+    `;
+
+    const result = await this.pool.query(query, [limit]);
+    return result.rows;
+  }
 }
 
 module.exports = PostsQuery;

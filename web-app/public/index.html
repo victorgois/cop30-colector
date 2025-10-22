@@ -3,15 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COP30 - Análise de Redes Sociais</title>
+    <title>SiMM - COP30 Social Media Monitoring</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>COP30 - Monitoramento de Redes Sociais</h1>
-            <p>Sistema de análise e visualização de dados sobre COP30 no Instagram e TikTok</p>
+            <div class="header-content">
+                <img src="images/logo.png" alt="SiMM Logo" class="header-logo">
+                <div class="header-text">
+                    <h1>SiMM - Social Media Monitoring</h1>
+                    <p>Sistema de análise e visualização de dados sobre COP30 no Instagram e TikTok</p>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -19,22 +25,73 @@
         <!-- Dashboard de Métricas -->
         <section id="dashboard">
             <h2>Dashboard de Métricas</h2>
+
+            <!-- Métricas Gerais -->
+            <div class="platform-metrics-header">
+                <h3>📊 Visão Geral</h3>
+            </div>
             <div class="metrics-grid">
-                <div class="metric-card">
+                <div class="metric-card metric-card-total">
                     <h3>Total de Posts</h3>
                     <p class="metric-value" id="total-posts">-</p>
                 </div>
-                <div class="metric-card">
-                    <h3>Usuários Únicos</h3>
-                    <p class="metric-value" id="unique-users">-</p>
+                <div class="metric-card metric-card-total">
+                    <h3>Total de Usuários</h3>
+                    <p class="metric-value" id="total-users">-</p>
                 </div>
-                <div class="metric-card">
-                    <h3>Média de Likes</h3>
-                    <p class="metric-value" id="avg-likes">-</p>
+                <div class="metric-card metric-card-total">
+                    <h3>Média Geral de Likes</h3>
+                    <p class="metric-value" id="total-avg-likes">-</p>
                 </div>
-                <div class="metric-card">
+                <div class="metric-card metric-card-total">
                     <h3>Última Coleta</h3>
                     <p class="metric-value" id="last-collection">-</p>
+                </div>
+            </div>
+
+            <!-- Métricas Instagram -->
+            <div class="platform-metrics-header instagram-header">
+                <h3>📸 Instagram</h3>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card metric-card-instagram">
+                    <h3>Posts</h3>
+                    <p class="metric-value" id="instagram-posts">-</p>
+                </div>
+                <div class="metric-card metric-card-instagram">
+                    <h3>Usuários</h3>
+                    <p class="metric-value" id="instagram-users">-</p>
+                </div>
+                <div class="metric-card metric-card-instagram">
+                    <h3>Média de Likes</h3>
+                    <p class="metric-value" id="instagram-likes">-</p>
+                </div>
+                <div class="metric-card metric-card-instagram">
+                    <h3>Média de Comentários</h3>
+                    <p class="metric-value" id="instagram-comments">-</p>
+                </div>
+            </div>
+
+            <!-- Métricas TikTok -->
+            <div class="platform-metrics-header tiktok-header">
+                <h3>🎵 TikTok</h3>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card metric-card-tiktok">
+                    <h3>Posts</h3>
+                    <p class="metric-value" id="tiktok-posts">-</p>
+                </div>
+                <div class="metric-card metric-card-tiktok">
+                    <h3>Usuários</h3>
+                    <p class="metric-value" id="tiktok-users">-</p>
+                </div>
+                <div class="metric-card metric-card-tiktok">
+                    <h3>Média de Likes</h3>
+                    <p class="metric-value" id="tiktok-likes">-</p>
+                </div>
+                <div class="metric-card metric-card-tiktok">
+                    <h3>Média de Comentários</h3>
+                    <p class="metric-value" id="tiktok-comments">-</p>
                 </div>
             </div>
         </section>
@@ -58,6 +115,16 @@
             <div id="hashtag-cloud"></div>
         </section>
 
+        <!-- Rede de Hashtags -->
+        <section id="network-section">
+            <h2>Rede de Relacionamento de Hashtags</h2>
+            <p style="color: #666; margin-bottom: 15px;">
+                Visualização de hashtags que aparecem juntas nos mesmos posts.
+                Nós maiores = hashtags mais usadas. Linhas mais grossas = maior frequência de co-ocorrência.
+            </p>
+            <div id="hashtag-network"></div>
+        </section>
+
         <!-- Top Posts -->
         <section id="top-posts-section">
             <h2>Posts com Maior Engajamento</h2>
@@ -70,6 +137,25 @@
             </div>
             <div id="top-posts-chart"></div>
         </section>
+
+        <!-- Galeria de Mídia -->
+        <section id="gallery-section">
+            <h2>Galeria de Imagens e Vídeos</h2>
+            <div class="filters">
+                <select id="gallery-platform-filter">
+                    <option value="">Todas as plataformas</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="tiktok">TikTok</option>
+                </select>
+                <select id="gallery-media-type-filter">
+                    <option value="">Todos os tipos</option>
+                    <option value="photo">Fotos</option>
+                    <option value="video">Vídeos</option>
+                </select>
+            </div>
+            <div id="gallery-grid"></div>
+            <button id="load-more-gallery" class="load-more-btn">Carregar Mais</button>
+        </section>
     </main>
 
     <footer>
@@ -81,7 +167,9 @@
     <script src="js/api-client.js"></script>
     <script src="js/visualizations/timeline.js"></script>
     <script src="js/visualizations/hashtag-cloud.js"></script>
+    <script src="js/visualizations/hashtag-network.js"></script>
     <script src="js/visualizations/engagement.js"></script>
+    <script src="js/visualizations/gallery.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
