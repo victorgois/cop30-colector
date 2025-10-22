@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { Pool } = require('pg');
 const PostsQuery = require('../../../database/queries/posts');
+const fs = require('fs');
+const path = require('path');
 
 // Configurar pool de conexão PostgreSQL
 const pool = new Pool({
@@ -134,6 +136,66 @@ router.get('/hashtag-network', async (req, res) => {
   } catch (error) {
     console.error('Erro ao buscar rede de hashtags:', error);
     res.status(500).json({ error: 'Erro ao buscar rede de hashtags' });
+  }
+});
+
+// GET /api/setup - Inicializar banco de dados (executar UMA vez após deploy)
+router.get('/setup', async (req, res) => {
+  try {
+    console.log('🔄 Iniciando setup do banco de dados...');
+
+    // Verificar se já foi inicializado
+    const checkQuery = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_name = 'posts'
+      ) as exists;
+    `;
+
+    const checkResult = await pool.query(checkQuery);
+
+    if (checkResult.rows[0].exists) {
+      return res.json({
+        status: 'already_initialized',
+        message: '✅ Banco de dados já foi inicializado anteriormente.',
+        tables: ['posts', 'users', 'collection_logs'],
+        views: ['stats_summary', 'daily_timeline', 'top_hashtags']
+      });
+    }
+
+    // Ler e executar o schema.sql
+    const schemaPath = path.join(__dirname, '../../../database/schema.sql');
+    const schema = fs.readFileSync(schemaPath, 'utf8');
+
+    console.log('📄 Executando schema.sql...');
+    await pool.query(schema);
+
+    console.log('✅ Banco de dados inicializado com sucesso!');
+
+    res.json({
+      status: 'success',
+      message: '✅ Banco de dados inicializado com sucesso!',
+      created: {
+        tables: ['posts', 'users', 'collection_logs'],
+        views: ['stats_summary', 'daily_timeline', 'top_hashtags'],
+        indexes: ['idx_posts_platform', 'idx_posts_created_at', 'idx_posts_keyword', 'idx_posts_hashtags']
+      },
+      next_steps: [
+        'Banco de dados está pronto!',
+        'Você pode começar a usar a aplicação',
+        'Execute o collector para popular com dados'
+      ]
+    });
+
+  } catch (error) {
+    console.error('❌ Erro ao inicializar banco:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Erro ao inicializar banco de dados',
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
