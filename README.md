@@ -278,8 +278,7 @@ Gráfico de barras dos posts com maior engajamento (likes, comentários, compart
 
 ## 📝 Licença
 
-Projeto desenvolvido por **VICTOR GOIS DE OLIVEIRA PACHECO LTDA**
-CNPJ: 47.944.119/0001-86
+Projeto desenvolvido por **VICTOR GOIS DE OLIVEIRA PACHECO**
 
 ## 📞 Contato
 
