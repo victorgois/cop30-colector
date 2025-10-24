@@ -258,16 +258,6 @@ Gráfico de barras dos posts com maior engajamento (likes, comentários, compart
 - ⏳ Refinamento das visualizações
 - ⏳ Documentação final
 
-## 💰 Estimativa de Custos
-
-### Infraestrutura (mensal)
-- Apify Starter Plan: R$ 245
-- PostgreSQL (Supabase): R$ 125
-- Hospedagem Backend: R$ 35
-- Hospedagem Frontend: R$ 100
-
-**Total mensal:** R$ 505
-
 ## 🔒 Considerações Éticas
 
 - ✅ Coleta apenas dados públicos
@@ -278,13 +268,4 @@ Gráfico de barras dos posts com maior engajamento (likes, comentários, compart
 
 ## 📝 Licença
 
-Projeto desenvolvido por **VICTOR GOIS DE OLIVEIRA PACHECO**
-
-## 📞 Contato
-
-Para dúvidas ou sugestões sobre o projeto, entre em contato.
-
----
-
-**Período de Execução:** Outubro a Dezembro de 2025
-**Orçamento Total:** R$ 5.000,00
+Projeto desenvolvido por **VICTOR GOIS DE OLIVEIRA PACHECO** sob a licença MIT
