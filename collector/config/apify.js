@@ -13,6 +13,7 @@ module.exports = {
   // Configurações de coleta
   collection: {
     // Limite de posts por hashtag (400-800 conforme limitação técnica)
+    // OTIMIZADO: Agora todas as hashtags são processadas em 1 única execução por plataforma
     maxPostsPerHashtag: 500,
 
     // Horários de coleta (2x por dia: 6h e 18h)
@@ -22,7 +23,8 @@ module.exports = {
     },
 
     // Timeout para cada execução (em milissegundos)
-    timeout: 600000, // 10 minutos
+    // Aumentado para acomodar coleta de múltiplas hashtags em batch
+    timeout: 900000, // 15 minutos (antes 10 minutos)
 
     // Memória alocada para cada Actor (em MB)
     memory: 4096
