@@ -1,0 +1,76 @@
+name: Automated Data Collection
+
+# Executa automaticamente em horários específicos e permite execução manual
+on:
+  # Agendamento usando cron (UTC timezone)
+  # 9:00 AM e 6:00 PM BRT = 12:00 PM e 9:00 PM UTC
+  schedule:
+    - cron: '0 12 * * *'  # 12:00 UTC (9:00 AM BRT) - Coleta da manhã
+    - cron: '0 21 * * *'  # 21:00 UTC (6:00 PM BRT) - Coleta da tarde
+
+  # Permite execução manual do workflow
+  workflow_dispatch:
+    inputs:
+      log_level:
+        description: 'Log level for collection'
+        required: false
+        default: 'info'
+        type: choice
+        options:
+          - debug
+          - info
+          - warn
+          - error
+
+jobs:
+  collect-data:
+    runs-on: ubuntu-latest
+
+    # Timeout de 30 minutos para evitar execução indefinida
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run data collection
+        env:
+          # Variáveis de ambiente do banco de dados
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+          # Variáveis de ambiente do Apify
+          APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+
+          # Configurações de coleta
+          AUTO_COLLECT_ENABLED: false  # Executa coleta única (não fica rodando cron)
+
+          # Configurações de log
+          LOG_LEVEL: ${{ inputs.log_level || 'info' }}
+
+          # Configurações do ambiente
+          NODE_ENV: production
+        run: node collector/index.js
+
+      - name: Upload logs as artifacts
+        if: always()  # Sempre faz upload dos logs, mesmo se falhar
+        uses: actions/upload-artifact@v4
+        with:
+          name: collection-logs-${{ github.run_number }}
+          path: logs/
+          retention-days: 7  # Mantém logs por 7 dias
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Data collection failed!"
+          echo "Check the logs artifact for details."
+          exit 1
