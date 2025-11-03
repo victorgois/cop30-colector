@@ -57,11 +57,15 @@ async function collectData(platform, keywordsArray) {
         resultsLimit: collection.maxPostsPerHashtag
       };
     } else if (platform === 'tiktok') {
+      // TikTok Scraper (clockworks/tiktok-scraper) configuration
       input = {
-        hashtags: keywordsArray,
-        resultsLimit: collection.maxPostsPerHashtag,
-        searchType: 'hashtag',
-        // Adicionar outras configurações do TikTok Scraper
+        hashtags: keywordsArray.map(tag => `#${tag}`),  // TikTok precisa do # na hashtag
+        resultsPerPage: collection.maxPostsPerHashtag,
+        searchSection: '',  // '' = geral, '/video' = só vídeos, '/user' = só usuários
+        shouldDownloadVideos: false,  // não baixar vídeos para economizar
+        shouldDownloadCovers: false,  // não baixar thumbnails
+        shouldDownloadSubtitles: false,  // não baixar legendas
+        shouldDownloadSlideshowImages: false
       };
     }
 

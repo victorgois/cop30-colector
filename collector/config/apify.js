@@ -12,9 +12,10 @@ module.exports = {
 
   // Configurações de coleta
   collection: {
-    // Limite de posts por hashtag (400-800 conforme limitação técnica)
-    // OTIMIZADO: Agora todas as hashtags são processadas em 1 única execução por plataforma
-    maxPostsPerHashtag: 500,
+    // Limite de posts por hashtag
+    // TESTE MANUAL: 9 hashtags × 15 posts = ~135 posts/plataforma/coleta (~$2 total)
+    // PRODUÇÃO: Use 30 posts para coletas automáticas (~$4 total)
+    maxPostsPerHashtag: 15,
 
     // Horários de coleta (2x por dia: 6h e 18h)
     schedule: {
@@ -32,13 +33,13 @@ module.exports = {
 
   // Configurações específicas por plataforma
   instagram: {
-    resultsLimit: 500,
+    resultsLimit: 15,
     searchType: 'hashtag',
     // Adicionar outras configurações específicas do Instagram Scraper
   },
 
   tiktok: {
-    resultsLimit: 500,
+    resultsLimit: 15,
     searchType: 'hashtag',
     // Adicionar outras configurações específicas do TikTok Scraper
   }
