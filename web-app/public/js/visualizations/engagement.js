@@ -1,22 +1,35 @@
 // Visualização de Engajamento usando D3.js
 
-function renderEngagement(data, metric) {
+/**
+ * Renderiza gráfico de engajamento para uma plataforma específica
+ */
+function renderEngagementForPlatform(data, metric, platform, containerId) {
   // Limpar visualização anterior
-  d3.select('#top-posts-chart').html('');
+  d3.select(`#${containerId}`).html('');
 
-  if (!data || data.length === 0) {
-    d3.select('#top-posts-chart').append('p')
-      .text('Nenhum dado disponível para exibir');
+  // Filtrar dados por plataforma
+  const platformData = data.filter(d => d.platform === platform);
+
+  if (!platformData || platformData.length === 0) {
+    d3.select(`#${containerId}`).append('p')
+      .style('text-align', 'center')
+      .style('color', '#666')
+      .style('padding', '20px')
+      .text(`Nenhum dado de ${platform} disponível para exibir`);
     return;
   }
 
-  // Configurações
-  const margin = { top: 20, right: 30, bottom: 100, left: 60 };
-  const width = document.getElementById('top-posts-chart').clientWidth - margin.left - margin.right;
+  // Limitar a 20 posts
+  const limitedData = platformData.slice(0, 20);
+
+  // Configurações (aumentado left margin para espaçamento do eixo Y)
+  const margin = { top: 20, right: 30, bottom: 100, left: 80 };
+  const containerElement = document.getElementById(containerId);
+  const width = containerElement.clientWidth - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
 
   // Criar SVG
-  const svg = d3.select('#top-posts-chart')
+  const svg = d3.select(`#${containerId}`)
     .append('svg')
     .attr('width', width + margin.left + margin.right)
     .attr('height', height + margin.top + margin.bottom)
@@ -25,12 +38,12 @@ function renderEngagement(data, metric) {
 
   // Escalas
   const x = d3.scaleBand()
-    .domain(data.map((d, i) => i))
+    .domain(limitedData.map((d, i) => i))
     .range([0, width])
     .padding(0.2);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => +d[metric])])
+    .domain([0, d3.max(limitedData, d => +d[metric])])
     .nice()
     .range([height, 0]);
 
@@ -45,25 +58,35 @@ function renderEngagement(data, metric) {
 
   svg.append('g')
     .attr('class', 'axis')
-    .call(d3.axisLeft(y));
+    .call(d3.axisLeft(y).tickFormat(d => {
+      // Formatar números grandes
+      if (d >= 1000000) return (d / 1000000).toFixed(1) + 'M';
+      if (d >= 1000) return (d / 1000).toFixed(1) + 'K';
+      return d;
+    }));
+
+  // Cor baseada na plataforma
+  const barColor = platform === 'instagram' ? '#E1306C' : '#010101';
 
   // Barras
   svg.selectAll('.bar')
-    .data(data)
+    .data(limitedData)
     .enter()
     .append('rect')
     .attr('class', 'bar')
+    .attr('fill', barColor)
     .attr('x', (d, i) => x(i))
     .attr('y', d => y(+d[metric]))
     .attr('width', x.bandwidth())
     .attr('height', d => height - y(+d[metric]))
+    .style('cursor', 'pointer')
     .on('mouseover', function(event, d) {
       d3.select(this).style('opacity', 0.7);
       const metricLabel = getMetricLabel(metric);
       showTooltip(event, `
         <strong>@${d.username}</strong><br>
         ${metricLabel}: ${(+d[metric]).toLocaleString('pt-BR')}<br>
-        Platform: ${d.platform}
+        Plataforma: ${d.platform}
       `);
     })
     .on('mouseout', function() {
@@ -76,15 +99,28 @@ function renderEngagement(data, metric) {
       }
     });
 
-  // Label do eixo Y
+  // Label do eixo Y (com espaçamento aumentado)
   const metricLabel = getMetricLabel(metric);
   svg.append('text')
     .attr('transform', 'rotate(-90)')
-    .attr('y', 0 - margin.left)
+    .attr('y', 0 - margin.left + 15)  // Aumentado espaçamento (era 0 - margin.left)
     .attr('x', 0 - (height / 2))
     .attr('dy', '1em')
     .style('text-anchor', 'middle')
+    .style('font-size', '14px')
+    .style('fill', '#333')
     .text(metricLabel);
+}
+
+/**
+ * Renderiza ambos os gráficos (Instagram e TikTok)
+ */
+function renderEngagement(data, metric) {
+  // Renderizar Instagram
+  renderEngagementForPlatform(data, metric, 'instagram', 'top-posts-instagram-chart');
+
+  // Renderizar TikTok
+  renderEngagementForPlatform(data, metric, 'tiktok', 'top-posts-tiktok-chart');
 }
 
 function getMetricLabel(metric) {

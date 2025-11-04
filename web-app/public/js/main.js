@@ -148,7 +148,8 @@ async function loadHashtagNetwork() {
 async function loadTopPosts() {
   try {
     const metric = document.getElementById('metric-filter')?.value || 'likes_count';
-    const data = await apiClient.getTopPosts(metric, 20);
+    // Buscar 40 posts para ter 20 de cada plataforma
+    const data = await apiClient.getTopPosts(metric, 40);
 
     if (window.renderEngagement) {
       window.renderEngagement(data, metric);
