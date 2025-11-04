@@ -48,13 +48,24 @@ function processInstagramPost(item, keyword) {
 
   // Coletar URLs de mídia
   const mediaUrls = [];
-  if (item.displayUrl) {
+
+  // Para vídeos, priorizar videoUrl sobre displayUrl (thumbnail)
+  if (mediaType === 'video' && item.videoUrl) {
+    mediaUrls.push(item.videoUrl);  // URL do vídeo completo
+    if (item.displayUrl) {
+      mediaUrls.push(item.displayUrl);  // Thumbnail como fallback
+    }
+  } else if (item.displayUrl) {
     mediaUrls.push(item.displayUrl);
   }
+
   // Se tiver posts filhos (carousel), adicionar também
   if (item.childPosts && Array.isArray(item.childPosts)) {
     item.childPosts.forEach(child => {
-      if (child.displayUrl) {
+      // Para vídeos no carousel, também priorizar videoUrl
+      if (child.type === 'video' && child.videoUrl) {
+        mediaUrls.push(child.videoUrl);
+      } else if (child.displayUrl) {
         mediaUrls.push(child.displayUrl);
       }
     });
