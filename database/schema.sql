@@ -89,7 +89,7 @@ SELECT
 FROM posts
 GROUP BY platform;
 
--- View para timeline diária
+-- View para timeline diária (apenas posts de 2025)
 CREATE OR REPLACE VIEW daily_timeline AS
 SELECT
     DATE(created_at) as date,
@@ -100,6 +100,7 @@ SELECT
     SUM(comments_count) as total_comments
 FROM posts
 WHERE created_at IS NOT NULL
+  AND EXTRACT(YEAR FROM created_at) = 2025  -- Apenas posts de 2025
 GROUP BY DATE(created_at), platform, keyword_matched
 ORDER BY date DESC;
 

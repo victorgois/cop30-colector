@@ -12,6 +12,7 @@
     "db:setup": "psql $DATABASE_URL < database/schema.sql",
     "db:migrate": "node database/migrations/run.js",
     "db:stats": "node check-database-stats.js",
+    "db:update-timeline": "node update-timeline-view.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

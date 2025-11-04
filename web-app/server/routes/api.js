@@ -139,6 +139,47 @@ router.get('/hashtag-network', async (req, res) => {
   }
 });
 
+// GET /api/update-timeline - Atualizar view para mostrar apenas 2025
+router.get('/update-timeline', async (req, res) => {
+  try {
+    console.log('🔄 Atualizando view daily_timeline...');
+
+    const query = `
+      CREATE OR REPLACE VIEW daily_timeline AS
+      SELECT
+          DATE(created_at) as date,
+          platform,
+          keyword_matched,
+          COUNT(*) as posts_count,
+          SUM(likes_count) as total_likes,
+          SUM(comments_count) as total_comments
+      FROM posts
+      WHERE created_at IS NOT NULL
+        AND EXTRACT(YEAR FROM created_at) = 2025
+      GROUP BY DATE(created_at), platform, keyword_matched
+      ORDER BY date DESC;
+    `;
+
+    await pool.query(query);
+
+    console.log('✅ View daily_timeline atualizada!');
+
+    res.json({
+      status: 'success',
+      message: '✅ View daily_timeline atualizada para mostrar apenas posts de 2025!',
+      note: 'Faça hard refresh (Ctrl+Shift+R) no navegador para ver as mudanças.'
+    });
+
+  } catch (error) {
+    console.error('❌ Erro ao atualizar view:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Erro ao atualizar view',
+      error: error.message
+    });
+  }
+});
+
 // GET /api/setup - Inicializar banco de dados (executar UMA vez após deploy)
 router.get('/setup', async (req, res) => {
   try {
