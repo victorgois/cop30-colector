@@ -70,6 +70,8 @@ function createGalleryItem(post) {
   item.dataset.postId = post.post_id;
 
   const mediaUrl = post.media_urls[0];
+  const thumbnailUrl = post.media_urls[1] || mediaUrl; // Fallback para primeira URL se não tiver segunda
+
   // Normaliza comparação de tipo (Video, video, etc)
   const mediaTypeLower = post.media_type ? post.media_type.toLowerCase() : '';
   const isVideo = mediaTypeLower === 'video';
@@ -79,9 +81,9 @@ function createGalleryItem(post) {
   mediaContainer.className = 'gallery-media';
 
   if (isVideo) {
-    // Para TikTok, mostra a thumbnail (cover)
-    // A URL do vídeo real está em post_url
     if (post.platform === 'tiktok') {
+      // Para TikTok, mostra a thumbnail (cover)
+      // A URL do vídeo real está em post_url
       const img = document.createElement('img');
       img.src = mediaUrl;
       img.alt = post.caption ? post.caption.substring(0, 100) : 'TikTok Video';
@@ -100,32 +102,58 @@ function createGalleryItem(post) {
 
       mediaContainer.appendChild(img);
     } else {
-      // Instagram vídeo
-      const video = document.createElement('video');
-      video.src = mediaUrl;
-      video.controls = false;
-      video.muted = true;
-      video.loop = true;
-      video.playsInline = true;
+      // Instagram vídeo - com fallback para caso URL esteja expirada
+      const hasValidVideoUrl = mediaUrl && (mediaUrl.includes('/o1/v/t2/') || mediaUrl.includes('video'));
 
-      // Play on hover
-      item.addEventListener('mouseenter', () => video.play());
-      item.addEventListener('mouseleave', () => {
-        video.pause();
-        video.currentTime = 0;
-      });
+      if (hasValidVideoUrl) {
+        // Renderizar elemento <video> se tiver URL válida
+        const video = document.createElement('video');
+        video.src = mediaUrl;
+        video.controls = false;
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
 
-      // Ícone de vídeo
-      const videoIcon = document.createElement('div');
-      videoIcon.className = 'video-icon';
-      videoIcon.innerHTML = '▶';
-      mediaContainer.appendChild(videoIcon);
+        // Usar thumbnail como poster
+        if (thumbnailUrl && thumbnailUrl !== mediaUrl) {
+          video.poster = thumbnailUrl;
+        }
 
-      mediaContainer.appendChild(video);
+        // Play on hover
+        item.addEventListener('mouseenter', () => {
+          video.play().catch(err => console.log('Erro ao reproduzir:', err));
+        });
+        item.addEventListener('mouseleave', () => {
+          video.pause();
+          video.currentTime = 0;
+        });
+
+        // Fallback se vídeo não carregar
+        video.onerror = function() {
+          console.log('Erro ao carregar vídeo, usando fallback card');
+          mediaContainer.innerHTML = '';
+          const fallbackCard = createInstagramFallbackCard(post);
+          mediaContainer.appendChild(fallbackCard);
+        };
+
+        // Ícone de vídeo
+        const videoIcon = document.createElement('div');
+        videoIcon.className = 'video-icon';
+        videoIcon.innerHTML = '▶';
+        mediaContainer.appendChild(videoIcon);
+
+        mediaContainer.appendChild(video);
+      } else {
+        // URL expirada ou inválida - usar fallback card
+        const fallbackCard = createInstagramFallbackCard(post);
+        mediaContainer.appendChild(fallbackCard);
+      }
     }
   } else {
-    // Para Instagram, sempre usa o fallback card devido a CORS
+    // Imagens
     if (post.platform === 'instagram') {
+      // Para Instagram, usa fallback card (URLs expiram)
       const fallbackCard = createInstagramFallbackCard(post);
       mediaContainer.appendChild(fallbackCard);
     } else {
@@ -317,26 +345,40 @@ async function loadGalleryPosts() {
     const params = new URLSearchParams();
     params.append('limit', '200'); // Pega mais posts para ter mais mídia
 
-    if (galleryState.filters.platform) {
+    // Aplica filtro de plataforma na API (se selecionado)
+    if (galleryState.filters.platform && galleryState.filters.platform !== '') {
       params.append('platform', galleryState.filters.platform);
     }
 
     const posts = await apiClient.getPosts(params);
 
-    // Filtra por tipo de mídia se necessário
+    // Aplica filtros adicionais no frontend
     let filteredPosts = posts;
-    if (galleryState.filters.mediaType) {
-      filteredPosts = posts.filter(post => {
+
+    // Filtra por plataforma no frontend também (garantia dupla)
+    if (galleryState.filters.platform && galleryState.filters.platform !== '') {
+      filteredPosts = filteredPosts.filter(post =>
+        post.platform === galleryState.filters.platform
+      );
+    }
+
+    // Filtra por tipo de mídia se necessário
+    if (galleryState.filters.mediaType && galleryState.filters.mediaType !== '') {
+      filteredPosts = filteredPosts.filter(post => {
         const mediaType = post.media_type ? post.media_type.toLowerCase() : '';
         const filterType = galleryState.filters.mediaType.toLowerCase();
 
-        // Normaliza tipos: 'image' -> 'photo', 'sidecar' -> 'photo' (carrossel de fotos)
-        const normalizedMediaType = mediaType === 'image' || mediaType === 'sidecar' ? 'photo' : mediaType;
+        // Normaliza tipos: 'image'/'sidecar' -> 'photo' (carrossel de fotos)
+        // Aceita tanto maiúsculas quanto minúsculas do banco
+        const normalizedMediaType = (mediaType === 'image' || mediaType === 'sidecar') ? 'photo' : mediaType;
         const normalizedFilterType = filterType === 'image' ? 'photo' : filterType;
 
         return normalizedMediaType === normalizedFilterType;
       });
     }
+
+    console.log(`[Gallery] Filtros aplicados - Platform: ${galleryState.filters.platform || 'todas'}, MediaType: ${galleryState.filters.mediaType || 'todos'}`);
+    console.log(`[Gallery] Posts retornados: ${posts.length}, Posts após filtros: ${filteredPosts.length}`);
 
     galleryState.posts = filteredPosts;
     galleryState.displayedCount = 0;
