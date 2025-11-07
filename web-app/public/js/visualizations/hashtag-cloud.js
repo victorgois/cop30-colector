@@ -77,13 +77,13 @@ function renderHashtagCloud(data) {
 
   legend.append('span')
     .style('font-size', '16px')
-    .style('color', '#667eea')
+    .style('color', '#FDB813')
     .style('font-weight', 'bold')
     .text('Mediana');
 
   legend.append('span')
     .style('font-size', '28px')
-    .style('color', '#764ba2')
+    .style('color', '#FFC94D')
     .style('font-weight', 'bold')
     .text('Mais usada');
 
@@ -118,9 +118,9 @@ function renderHashtagCloud(data) {
     .domain([minCount, maxCount])
     .range([14, 64]); // Range maior para melhor hierarquia visual
 
-  // Escala de cores com mais variedade
+  // Escala de cores (identidade visual: variações de amarelo, preto e cinza)
   const color = d3.scaleOrdinal()
-    .range(['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#38f9d7', '#fa709a', '#fee140', '#30cfd0', '#a8edea']);
+    .range(['#FDB813', '#000000', '#FFC94D', '#333333', '#FFD966', '#1a1a1a', '#FFEB99', '#4d4d4d', '#FFE066', '#666666']);
 
   // Pegar top 50 hashtags para evitar sobrecarga visual
   const topHashtags = data.slice(0, 50);

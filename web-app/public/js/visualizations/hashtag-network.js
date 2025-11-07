@@ -74,7 +74,7 @@ function renderHashtagNetwork(data) {
 
   legend.append('span')
     .style('font-weight', '600')
-    .text('📊 Visualização:');
+    .text('Visualização:');
 
   legend.append('span')
     .html('🔵 <strong>Nó</strong> = Hashtag (tamanho = popularidade)');
@@ -134,10 +134,10 @@ function renderHashtagNetwork(data) {
     .domain([1, maxLinkValue])
     .range([0.2, 0.8]);
 
-  // Cores por plataforma dominante
+  // Cores por plataforma dominante (identidade visual: amarelo e preto)
   const colorScale = d3.scaleOrdinal()
     .domain(['instagram', 'tiktok', 'both'])
-    .range(['#E1306C', '#00f2ea', '#667eea']);
+    .range(['#FDB813', '#000000', '#FFC94D']);
 
   // Determinar cor do nó baseado em plataformas
   nodes.forEach(node => {
@@ -154,18 +154,18 @@ function renderHashtagNetwork(data) {
     }
   });
 
-  // Force simulation
+  // Force simulation (aumentado espaçamento para melhor legibilidade)
   const simulation = d3.forceSimulation(nodes)
     .force('link', d3.forceLink(links)
       .id(d => d.id)
-      .distance(d => 100 - (d.value * 3)) // Conexões fortes ficam mais próximas
+      .distance(d => 150 - (d.value * 2)) // Conexões fortes ficam mais próximas (aumentado de 100)
       .strength(d => d.value / maxLinkValue))
     .force('charge', d3.forceManyBody()
-      .strength(-300)
-      .distanceMax(400))
+      .strength(-500) // Aumentado de -300 para maior repulsão
+      .distanceMax(500)) // Aumentado de 400
     .force('center', d3.forceCenter(width / 2, height / 2))
     .force('collision', d3.forceCollide()
-      .radius(d => nodeScale(d.value) + 5))
+      .radius(d => nodeScale(d.value) + 20)) // Aumentado de +5 para +20
     .alphaDecay(0.02);
 
   networkState.simulation = simulation;
@@ -198,10 +198,20 @@ function renderHashtagNetwork(data) {
     .attr('stroke-width', 2)
     .style('cursor', 'pointer');
 
+  // Adicionar fundo para o texto (para melhor legibilidade)
+  node.append('rect')
+    .attr('x', d => -(`#${d.name}`.length * Math.max(10, Math.min(14, nodeScale(d.value) / 2)) * 0.3))
+    .attr('y', d => nodeScale(d.value) + 18)
+    .attr('width', d => `#${d.name}`.length * Math.max(10, Math.min(14, nodeScale(d.value) / 2)) * 0.6)
+    .attr('height', d => Math.max(10, Math.min(14, nodeScale(d.value) / 2)) + 4)
+    .attr('fill', 'rgba(255, 255, 255, 0.85)')
+    .attr('rx', 3)
+    .style('pointer-events', 'none');
+
   node.append('text')
     .text(d => `#${d.name}`)
     .attr('x', 0)
-    .attr('y', d => nodeScale(d.value) + 15)
+    .attr('y', d => nodeScale(d.value) + 25) // Aumentado de +15 para +25
     .attr('text-anchor', 'middle')
     .style('font-size', d => Math.max(10, Math.min(14, nodeScale(d.value) / 2)) + 'px')
     .style('fill', '#333')
@@ -213,7 +223,7 @@ function renderHashtagNetwork(data) {
   node.on('mouseover', function(event, d) {
     // Highlight conexões
     link.style('stroke', l =>
-      l.source.id === d.id || l.target.id === d.id ? '#667eea' : '#999'
+      l.source.id === d.id || l.target.id === d.id ? '#FDB813' : '#999'
     )
     .style('stroke-opacity', l =>
       l.source.id === d.id || l.target.id === d.id ? 0.8 : 0.1
@@ -221,7 +231,7 @@ function renderHashtagNetwork(data) {
 
     d3.select(this).select('circle')
       .attr('stroke-width', 4)
-      .attr('stroke', '#667eea');
+      .attr('stroke', '#FDB813');
 
     // Tooltip
     showTooltip(event, `

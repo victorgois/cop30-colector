@@ -65,8 +65,8 @@ function renderEngagementForPlatform(data, metric, platform, containerId) {
       return d;
     }));
 
-  // Cor baseada na plataforma
-  const barColor = platform === 'instagram' ? '#E1306C' : '#010101';
+  // Cor baseada na plataforma (identidade visual: amarelo e preto)
+  const barColor = platform === 'instagram' ? '#FDB813' : '#000000';
 
   // Barras
   svg.selectAll('.bar')

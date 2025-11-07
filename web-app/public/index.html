@@ -24,11 +24,15 @@
     <main class="container">
         <!-- Dashboard de Métricas -->
         <section id="dashboard">
-            <h2>Dashboard de Métricas</h2>
+            <h2>
+                <span class="section-title">Dashboard de Métricas</span>
+                <button class="toggle-section" data-target="dashboard-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="dashboard-content" class="section-content">
 
             <!-- Métricas Gerais -->
             <div class="platform-metrics-header">
-                <h3>📊 Visão Geral</h3>
+                <h3>Visão Geral</h3>
             </div>
             <div class="metrics-grid">
                 <div class="metric-card metric-card-total">
@@ -40,10 +44,6 @@
                     <p class="metric-value" id="total-users">-</p>
                 </div>
                 <div class="metric-card metric-card-total">
-                    <h3>Média Geral de Likes</h3>
-                    <p class="metric-value" id="total-avg-likes">-</p>
-                </div>
-                <div class="metric-card metric-card-total">
                     <h3>Última Coleta</h3>
                     <p class="metric-value" id="last-collection">-</p>
                 </div>
@@ -51,7 +51,7 @@
 
             <!-- Métricas Instagram -->
             <div class="platform-metrics-header instagram-header">
-                <h3>📸 Instagram</h3>
+                <h3>Instagram</h3>
             </div>
             <div class="metrics-grid">
                 <div class="metric-card metric-card-instagram">
@@ -63,10 +63,6 @@
                     <p class="metric-value" id="instagram-users">-</p>
                 </div>
                 <div class="metric-card metric-card-instagram">
-                    <h3>Média de Likes</h3>
-                    <p class="metric-value" id="instagram-likes">-</p>
-                </div>
-                <div class="metric-card metric-card-instagram">
                     <h3>Média de Comentários</h3>
                     <p class="metric-value" id="instagram-comments">-</p>
                 </div>
@@ -74,7 +70,7 @@
 
             <!-- Métricas TikTok -->
             <div class="platform-metrics-header tiktok-header">
-                <h3>🎵 TikTok</h3>
+                <h3>TikTok</h3>
             </div>
             <div class="metrics-grid">
                 <div class="metric-card metric-card-tiktok">
@@ -86,19 +82,201 @@
                     <p class="metric-value" id="tiktok-users">-</p>
                 </div>
                 <div class="metric-card metric-card-tiktok">
-                    <h3>Média de Likes</h3>
-                    <p class="metric-value" id="tiktok-likes">-</p>
-                </div>
-                <div class="metric-card metric-card-tiktok">
                     <h3>Média de Comentários</h3>
                     <p class="metric-value" id="tiktok-comments">-</p>
                 </div>
+            </div>
+            </div>
+        </section>
+
+        <!-- Histórico de Coletas -->
+        <section id="collection-history-section">
+            <h2>
+                <span class="section-title">Histórico de Coletas</span>
+                <button class="toggle-section" data-target="collection-history-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="collection-history-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Registro detalhado de todas as sessões de coleta realizadas pelo sistema,
+                mostrando quantidade de posts coletados por plataforma e horário.
+            </p>
+            <div id="collection-history-table"></div>
+            </div>
+        </section>
+
+
+
+        <!-- Análise de Latência -->
+<!--         <section id="latency-section">
+            <h2>
+                <span class="section-title">Análise de Latência: Postagem vs Coleta</span>
+                <button class="toggle-section" data-target="latency-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="latency-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Comparação entre quando os posts foram publicados (<strong>created_at</strong>)
+                e quando foram coletados pelo sistema (<strong>collected_at</strong>).
+                Pontos acima da linha diagonal indicam posts coletados com atraso.
+            </p>
+            <div class="filters">
+                <select id="latency-platform-filter">
+                    <option value="">Todas as plataformas</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="tiktok">TikTok</option>
+                </select>
+            </div>
+
+            <div id="latency-scatter-chart"></div>
+            </div>
+        </section> -->
+
+        <!-- Timeline de Likes -->
+        <section id="likes-timeline-section">
+            <h2>
+                <span class="section-title">Timeline de Likes por Data de Postagem</span>
+                <button class="toggle-section" data-target="likes-timeline-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="likes-timeline-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Visualização da quantidade de likes de cada post ao longo do tempo.
+                <strong>Preto</strong> = Instagram, <strong>Amarelo</strong> = TikTok.
+                Clique em um ponto para abrir o post.
+            </p>
+            <div class="filters">
+                <select id="likes-platform-filter">
+                    <option value="">Todas as plataformas</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="tiktok">TikTok</option>
+                </select>
+            </div>
+
+            <div id="likes-timeline-chart"></div>
+            </div>
+        </section>
+
+        <!-- Nuvem de Hashtags -->
+        <section id="hashtags-section">
+            <h2>
+                <span class="section-title">Hashtags Mais Usadas</span>
+                <button class="toggle-section" data-target="hashtags-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="hashtags-content" class="section-content">
+            <div id="hashtag-cloud"></div>
+            </div>
+        </section>
+
+        <!-- Rede de Hashtags -->
+        <section id="network-section">
+            <h2>
+                <span class="section-title">Rede de Relacionamento de Hashtags</span>
+                <button class="toggle-section" data-target="network-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="network-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Visualização de hashtags que aparecem juntas nos mesmos posts.
+                Nós maiores = hashtags mais usadas. Linhas mais grossas = maior frequência de co-ocorrência.
+            </p>
+            <div id="hashtag-network"></div>
+            </div>
+        </section>
+
+        <!-- Análise de Influenciadores -->
+        <section id="influencers-section">
+            <h2>
+                <span class="section-title">🌟 Top Influenciadores por Engajamento</span>
+                <button class="toggle-section" data-target="influencers-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="influencers-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Ranking dos usuários com maior engajamento total (likes + comentários) na discussão sobre COP30.
+                Identifica quem está movendo a conversa e gerando mais interações.
+            </p>
+            <div id="influencers-chart"></div>
+            </div>
+        </section>
+
+        <!-- Comparativo entre Plataformas -->
+        <section id="platform-comparison-section">
+            <h2>
+                <span class="section-title">⚖️ Comparativo Instagram vs TikTok</span>
+                <button class="toggle-section" data-target="platform-comparison-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="platform-comparison-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Análise comparativa detalhada entre Instagram e TikTok: engajamento, tipos de conteúdo,
+                uso de hashtags e comportamento do público em cada plataforma.
+            </p>
+            <div id="platform-comparison-chart"></div>
+            </div>
+        </section>
+
+        <!-- Análise de Performance de Conteúdo -->
+        <section id="content-performance-section">
+            <h2>
+                <span class="section-title">📈 Análise de Performance de Conteúdo</span>
+                <button class="toggle-section" data-target="content-performance-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="content-performance-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Distribuição de engajamento, correlação entre hashtags e performance,
+                e identificação de posts que geram mais discussão (alta razão comentários/likes).
+            </p>
+            <div id="content-performance-chart"></div>
+            </div>
+        </section>
+
+        <!-- Atividade Temporal (Heatmap) -->
+        <section id="temporal-heatmap-section">
+            <h2>
+                <span class="section-title">🕒 Atividade Temporal (Heatmap)</span>
+                <button class="toggle-section" data-target="temporal-heatmap-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="temporal-heatmap-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Mapa de calor mostrando quando os posts são publicados: análise por dia da semana e hora do dia,
+                revelando os melhores momentos para engajamento.
+            </p>
+            <div id="temporal-heatmap-chart"></div>
+            </div>
+        </section>
+
+        <!-- Dashboard Avançado de Hashtags -->
+        <section id="hashtag-dashboard-section">
+            <h2>
+                <span class="section-title">📊 Dashboard Avançado de Hashtags</span>
+                <button class="toggle-section" data-target="hashtag-dashboard-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="hashtag-dashboard-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Análise profunda de hashtags: identifica hashtags emergentes com maior crescimento
+                e acompanha a evolução temporal de hashtags específicas ao longo do tempo.
+            </p>
+            <div id="hashtag-dashboard-chart"></div>
+            </div>
+        </section>
+
+        <!-- Análise de Narrativas -->
+        <section id="narrative-analysis-section">
+            <h2>
+                <span class="section-title">💬 Análise de Narrativas e Discurso</span>
+                <button class="toggle-section" data-target="narrative-analysis-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="narrative-analysis-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Análise detalhada do conteúdo das captions: palavras mais usadas, distribuição de comprimento,
+                uso de emojis e menções, revelando padrões de comunicação e narrativa.
+            </p>
+            <div id="narrative-analysis-chart"></div>
             </div>
         </section>
 
         <!-- Timeline de Posts -->
         <section id="timeline-section">
-            <h2>Timeline de Posts</h2>
+            <h2>
+                <span class="section-title">Timeline de Posts</span>
+                <button class="toggle-section" data-target="timeline-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="timeline-content" class="section-content">
             <div class="filters">
                 <select id="platform-filter">
                     <option value="">Todas as plataformas</option>
@@ -107,27 +285,15 @@
                 </select>
             </div>
             <div id="timeline-chart"></div>
+            </div>
         </section>
-
-        <!-- Nuvem de Hashtags -->
-        <section id="hashtags-section">
-            <h2>Hashtags Mais Usadas</h2>
-            <div id="hashtag-cloud"></div>
-        </section>
-
-        <!-- Rede de Hashtags -->
-        <section id="network-section">
-            <h2>Rede de Relacionamento de Hashtags</h2>
-            <p style="color: #666; margin-bottom: 15px;">
-                Visualização de hashtags que aparecem juntas nos mesmos posts.
-                Nós maiores = hashtags mais usadas. Linhas mais grossas = maior frequência de co-ocorrência.
-            </p>
-            <div id="hashtag-network"></div>
-        </section>
-
         <!-- Top Posts -->
-        <section id="top-posts-section">
-            <h2>Posts com Maior Engajamento</h2>
+        <!-- <section id="top-posts-section">
+            <h2>
+                <span class="section-title">Posts com Maior Engajamento</span>
+                <button class="toggle-section" data-target="top-posts-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="top-posts-content" class="section-content">
             <div class="filters">
                 <select id="metric-filter">
                     <option value="likes_count">Likes</option>
@@ -135,50 +301,115 @@
                 </select>
             </div>
 
-            <!-- Instagram Posts -->
             <div class="platform-metrics-header instagram-header" style="margin-top: 20px;">
-                <h3>📸 Instagram</h3>
+                <h3>Instagram</h3>
             </div>
             <div id="top-posts-instagram-chart"></div>
 
-            <!-- TikTok Posts -->
             <div class="platform-metrics-header tiktok-header" style="margin-top: 30px;">
-                <h3>🎵 TikTok</h3>
+                <h3>TikTok</h3>
             </div>
             <div id="top-posts-tiktok-chart"></div>
-        </section>
+            </div>
+        </section> 
+    -->
 
         <!-- Galeria de Mídia -->
         <section id="gallery-section">
-            <h2>Galeria de Imagens e Vídeos</h2>
-            <div class="filters">
-                <select id="gallery-platform-filter">
-                    <option value="">Todas as plataformas</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="tiktok">TikTok</option>
-                </select>
-                <select id="gallery-media-type-filter">
-                    <option value="">Todos os tipos</option>
-                    <option value="photo">Fotos</option>
-                    <option value="video">Vídeos</option>
-                </select>
+            <h2>
+                <span class="section-title">Galeria de Imagens e Vídeos</span>
+                <button class="toggle-section" data-target="gallery-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="gallery-content" class="section-content">
+            <div class="gallery-filters-container">
+                <!-- Linha 1: Filtros básicos -->
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="gallery-platform-filter">Plataforma:</label>
+                        <select id="gallery-platform-filter">
+                            <option value="">Todas</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="tiktok">TikTok</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="gallery-media-type-filter">Tipo de Mídia:</label>
+                        <select id="gallery-media-type-filter">
+                            <option value="">Todos</option>
+                            <option value="photo">Fotos</option>
+                            <option value="video">Vídeos</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="gallery-sort-filter">Ordenar por:</label>
+                        <select id="gallery-sort-filter">
+                            <option value="date-desc">Mais recente</option>
+                            <option value="date-asc">Mais antigo</option>
+                            <option value="likes-desc">Mais curtidos</option>
+                            <option value="likes-asc">Menos curtidos</option>
+                            <option value="comments-desc">Mais comentários</option>
+                            <option value="views-desc">Mais visualizações</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Linha 2: Filtros avançados -->
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="gallery-hashtag-filter">Hashtag:</label>
+                        <input type="text" id="gallery-hashtag-filter" placeholder="#cop30, #amazonia..." />
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="gallery-min-likes">Mín. Curtidas:</label>
+                        <input type="number" id="gallery-min-likes" min="0" placeholder="Ex: 1000" />
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="gallery-date-from">Data inicial:</label>
+                        <input type="date" id="gallery-date-from" />
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="gallery-date-to">Data final:</label>
+                        <input type="date" id="gallery-date-to" />
+                    </div>
+                </div>
+
+                <!-- Botão para limpar filtros -->
+                <div class="filters-row">
+                    <button id="gallery-clear-filters" class="clear-filters-btn">🔄 Limpar Filtros</button>
+                    <span id="gallery-results-count" class="results-count"></span>
+                </div>
             </div>
             <div id="gallery-grid"></div>
             <button id="load-more-gallery" class="load-more-btn">Carregar Mais</button>
+            </div>
         </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 VICTOR GOIS DE OLIVEIRA PACHECO LTDA - Projeto COP30</p>
+            <p>&copy; 2025 Victor Góis. Licenciado sobre GNU GPL v3.0 </p>
         </div>
     </footer>
 
     <script src="js/api-client.js"></script>
+    <script src="js/visualizations/collection-history.js"></script>
     <script src="js/visualizations/timeline.js"></script>
+    <script src="js/visualizations/latency-analysis.js"></script>
+    <script src="js/visualizations/likes-timeline.js"></script>
     <script src="js/visualizations/hashtag-cloud.js"></script>
     <script src="js/visualizations/hashtag-network.js"></script>
     <script src="js/visualizations/engagement.js"></script>
+    <script src="js/visualizations/influencers.js"></script>
+    <script src="js/visualizations/platform-comparison.js"></script>
+    <script src="js/visualizations/content-performance.js"></script>
+    <script src="js/visualizations/temporal-heatmap.js"></script>
+    <script src="js/visualizations/hashtag-dashboard.js"></script>
+    <script src="js/visualizations/narrative-analysis.js"></script>
     <script src="js/visualizations/gallery.js"></script>
     <script src="js/main.js"></script>
 </body>

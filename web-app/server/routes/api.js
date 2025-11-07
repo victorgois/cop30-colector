@@ -139,6 +139,42 @@ router.get('/hashtag-network', async (req, res) => {
   }
 });
 
+// GET /api/latency-analysis - Análise de latência entre created_at e collected_at
+router.get('/latency-analysis', async (req, res) => {
+  try {
+    const { platform } = req.query;
+    const data = await postsQuery.getLatencyAnalysis(platform);
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar análise de latência:', error);
+    res.status(500).json({ error: 'Erro ao buscar análise de latência' });
+  }
+});
+
+// GET /api/collection-history - Histórico de coletas
+router.get('/collection-history', async (req, res) => {
+  try {
+    const { limit } = req.query;
+    const data = await postsQuery.getCollectionHistory(parseInt(limit) || 50);
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar histórico de coletas:', error);
+    res.status(500).json({ error: 'Erro ao buscar histórico de coletas' });
+  }
+});
+
+// GET /api/likes-timeline - Timeline de likes por data de postagem
+router.get('/likes-timeline', async (req, res) => {
+  try {
+    const { platform } = req.query;
+    const data = await postsQuery.getLikesTimeline(platform);
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar timeline de likes:', error);
+    res.status(500).json({ error: 'Erro ao buscar timeline de likes' });
+  }
+});
+
 // GET /api/update-timeline - Atualizar view para mostrar apenas 2025
 router.get('/update-timeline', async (req, res) => {
   try {
@@ -177,6 +213,116 @@ router.get('/update-timeline', async (req, res) => {
       message: 'Erro ao atualizar view',
       error: error.message
     });
+  }
+});
+
+// GET /api/influencers - Top influenciadores por engajamento
+router.get('/influencers', async (req, res) => {
+  try {
+    const { limit } = req.query;
+    const data = await postsQuery.getTopInfluencers(limit ? parseInt(limit) : 20);
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar influenciadores:', error);
+    res.status(500).json({ error: 'Erro ao buscar influenciadores' });
+  }
+});
+
+// GET /api/platform-comparison - Comparativo entre plataformas
+router.get('/platform-comparison', async (req, res) => {
+  try {
+    const data = await postsQuery.getPlatformComparison();
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar comparativo de plataformas:', error);
+    res.status(500).json({ error: 'Erro ao buscar comparativo de plataformas' });
+  }
+});
+
+// GET /api/content-performance - Análise de performance de conteúdo
+router.get('/content-performance', async (req, res) => {
+  try {
+    const data = await postsQuery.getContentPerformance();
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar performance de conteúdo:', error);
+    res.status(500).json({ error: 'Erro ao buscar performance de conteúdo' });
+  }
+});
+
+// GET /api/engagement-distribution - Distribuição de engajamento
+router.get('/engagement-distribution', async (req, res) => {
+  try {
+    const { platform } = req.query;
+    const data = await postsQuery.getEngagementDistribution(platform);
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar distribuição de engajamento:', error);
+    res.status(500).json({ error: 'Erro ao buscar distribuição de engajamento' });
+  }
+});
+
+// GET /api/temporal-activity - Análise temporal de atividade (heatmap)
+router.get('/temporal-activity', async (req, res) => {
+  try {
+    const { platform } = req.query;
+    const data = await postsQuery.getTemporalActivity(platform);
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar atividade temporal:', error);
+    res.status(500).json({ error: 'Erro ao buscar atividade temporal' });
+  }
+});
+
+// GET /api/hashtag-evolution - Evolução temporal de hashtags
+router.get('/hashtag-evolution', async (req, res) => {
+  try {
+    const { hashtags, platform } = req.query;
+    if (!hashtags) {
+      return res.status(400).json({ error: 'Parâmetro hashtags é obrigatório' });
+    }
+    const hashtagArray = hashtags.split(',').map(h => h.trim().toLowerCase().replace('#', ''));
+    const data = await postsQuery.getHashtagEvolution(hashtagArray, platform);
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar evolução de hashtags:', error);
+    res.status(500).json({ error: 'Erro ao buscar evolução de hashtags' });
+  }
+});
+
+// GET /api/emerging-hashtags - Hashtags emergentes
+router.get('/emerging-hashtags', async (req, res) => {
+  try {
+    const { limit } = req.query;
+    const data = await postsQuery.getEmergingHashtags(limit ? parseInt(limit) : 20);
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar hashtags emergentes:', error);
+    res.status(500).json({ error: 'Erro ao buscar hashtags emergentes' });
+  }
+});
+
+// GET /api/narrative-analysis - Análise de narrativas e discurso
+router.get('/narrative-analysis', async (req, res) => {
+  try {
+    const { platform } = req.query;
+    const data = await postsQuery.getNarrativeAnalysis(platform);
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar análise de narrativas:', error);
+    res.status(500).json({ error: 'Erro ao buscar análise de narrativas' });
+  }
+});
+
+// GET /api/top-words - Palavras mais usadas nas captions
+router.get('/top-words', async (req, res) => {
+  try {
+    const { limit, platform } = req.query;
+    const data = await postsQuery.getTopWords(limit ? parseInt(limit) : 50, platform);
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar palavras mais usadas:', error);
+    res.status(500).json({ error: 'Erro ao buscar palavras mais usadas' });
   }
 });
 

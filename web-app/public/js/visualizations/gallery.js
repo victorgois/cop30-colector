@@ -2,11 +2,17 @@
 
 let galleryState = {
   posts: [],
+  allPosts: [], // Armazena todos os posts carregados
   displayedCount: 0,
   batchSize: 12,
   filters: {
     platform: '',
-    mediaType: ''
+    mediaType: '',
+    sortBy: 'date-desc',
+    hashtag: '',
+    minLikes: '',
+    dateFrom: '',
+    dateTo: ''
   }
 };
 
@@ -184,11 +190,6 @@ function createGalleryItem(post) {
   const userInfo = document.createElement('div');
   userInfo.className = 'gallery-user';
 
-  const platformIcon = post.platform === 'instagram' ? '📷' : '🎵';
-  userInfo.innerHTML = `
-    <span class="platform-badge">${platformIcon} ${post.platform}</span>
-    <span class="username">@${post.username}</span>
-  `;
   info.appendChild(userInfo);
 
   // Estatísticas
@@ -248,7 +249,7 @@ function createInstagramFallbackCard(post) {
   card.style.cssText = `
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    background: black;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -258,28 +259,7 @@ function createInstagramFallbackCard(post) {
     text-align: center;
   `;
 
-  // Ícone baseado no tipo de mídia
-  const icon = document.createElement('div');
-  icon.style.fontSize = '48px';
-  const mediaTypeLower = post.media_type ? post.media_type.toLowerCase() : '';
-  if (mediaTypeLower === 'video') {
-    icon.textContent = '🎥';
-  } else if (mediaTypeLower === 'sidecar') {
-    icon.textContent = '🖼️📸'; // Carrossel
-  } else {
-    icon.textContent = '📷';
-  }
 
-  // Badge do tipo de mídia
-  const typeBadge = document.createElement('div');
-  typeBadge.style.cssText = 'font-size: 10px; margin-top: 8px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px;';
-  if (mediaTypeLower === 'video') {
-    typeBadge.textContent = 'Vídeo';
-  } else if (mediaTypeLower === 'sidecar') {
-    typeBadge.textContent = 'Carrossel';
-  } else {
-    typeBadge.textContent = 'Foto';
-  }
 
   const title = document.createElement('div');
   title.style.cssText = 'font-size: 14px; margin-top: 10px; font-weight: 600;';
@@ -300,8 +280,6 @@ function createInstagramFallbackCard(post) {
   message.style.cssText = 'font-size: 10px; margin-top: 12px; opacity: 0.7; font-style: italic;';
   message.textContent = 'Clique para ver no Instagram';
 
-  card.appendChild(icon);
-  card.appendChild(typeBadge);
   card.appendChild(title);
   card.appendChild(caption);
   card.appendChild(stats);
@@ -338,50 +316,142 @@ function formatNumber(num) {
 }
 
 /**
+ * Aplica todos os filtros aos posts
+ */
+function applyFilters(posts) {
+  let filtered = [...posts];
+
+  // Filtro de plataforma
+  if (galleryState.filters.platform) {
+    filtered = filtered.filter(post => post.platform === galleryState.filters.platform);
+  }
+
+  // Filtro de tipo de mídia
+  if (galleryState.filters.mediaType) {
+    filtered = filtered.filter(post => {
+      const mediaType = post.media_type ? post.media_type.toLowerCase() : '';
+      const filterType = galleryState.filters.mediaType.toLowerCase();
+      const normalizedMediaType = (mediaType === 'image' || mediaType === 'sidecar') ? 'photo' : mediaType;
+      const normalizedFilterType = filterType === 'image' ? 'photo' : filterType;
+      return normalizedMediaType === normalizedFilterType;
+    });
+  }
+
+  // Filtro de hashtag
+  if (galleryState.filters.hashtag) {
+    const hashtags = galleryState.filters.hashtag
+      .toLowerCase()
+      .split(',')
+      .map(tag => tag.trim().replace('#', ''))
+      .filter(tag => tag.length > 0);
+
+    if (hashtags.length > 0) {
+      filtered = filtered.filter(post => {
+        if (!post.hashtags || !Array.isArray(post.hashtags)) return false;
+        const postHashtags = post.hashtags.map(h => h.toLowerCase());
+        return hashtags.some(tag => postHashtags.includes(tag));
+      });
+    }
+  }
+
+  // Filtro de mínimo de curtidas
+  if (galleryState.filters.minLikes && galleryState.filters.minLikes !== '') {
+    const minLikes = parseInt(galleryState.filters.minLikes);
+    filtered = filtered.filter(post => (post.likes_count || 0) >= minLikes);
+  }
+
+  // Filtro de data inicial
+  if (galleryState.filters.dateFrom) {
+    const dateFrom = new Date(galleryState.filters.dateFrom);
+    filtered = filtered.filter(post => {
+      if (!post.created_at) return false;
+      const postDate = new Date(post.created_at);
+      return postDate >= dateFrom;
+    });
+  }
+
+  // Filtro de data final
+  if (galleryState.filters.dateTo) {
+    const dateTo = new Date(galleryState.filters.dateTo);
+    dateTo.setHours(23, 59, 59, 999); // Incluir o dia inteiro
+    filtered = filtered.filter(post => {
+      if (!post.created_at) return false;
+      const postDate = new Date(post.created_at);
+      return postDate <= dateTo;
+    });
+  }
+
+  return filtered;
+}
+
+/**
+ * Ordena os posts de acordo com o filtro selecionado
+ */
+function sortPosts(posts) {
+  const sorted = [...posts];
+
+  switch (galleryState.filters.sortBy) {
+    case 'date-desc':
+      sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      break;
+    case 'date-asc':
+      sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      break;
+    case 'likes-desc':
+      sorted.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));
+      break;
+    case 'likes-asc':
+      sorted.sort((a, b) => (a.likes_count || 0) - (b.likes_count || 0));
+      break;
+    case 'comments-desc':
+      sorted.sort((a, b) => (b.comments_count || 0) - (a.comments_count || 0));
+      break;
+    case 'views-desc':
+      sorted.sort((a, b) => (b.views_count || 0) - (a.views_count || 0));
+      break;
+    default:
+      sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }
+
+  return sorted;
+}
+
+/**
+ * Atualiza o contador de resultados
+ */
+function updateResultsCount(count) {
+  const counter = document.getElementById('gallery-results-count');
+  if (counter) {
+    counter.textContent = count === 1 ? '1 resultado encontrado' : `${count} resultados encontrados`;
+  }
+}
+
+/**
  * Carrega posts para a galeria
  */
 async function loadGalleryPosts() {
   try {
     const params = new URLSearchParams();
-    params.append('limit', '200'); // Pega mais posts para ter mais mídia
-
-    // Aplica filtro de plataforma na API (se selecionado)
-    if (galleryState.filters.platform && galleryState.filters.platform !== '') {
-      params.append('platform', galleryState.filters.platform);
-    }
+    params.append('limit', '500'); // Aumentar limite para ter mais dados para filtrar
 
     const posts = await apiClient.getPosts(params);
 
-    // Aplica filtros adicionais no frontend
-    let filteredPosts = posts;
+    console.log(`[Gallery] ${posts.length} posts carregados da API`);
 
-    // Filtra por plataforma no frontend também (garantia dupla)
-    if (galleryState.filters.platform && galleryState.filters.platform !== '') {
-      filteredPosts = filteredPosts.filter(post =>
-        post.platform === galleryState.filters.platform
-      );
-    }
+    // Armazenar todos os posts
+    galleryState.allPosts = posts;
 
-    // Filtra por tipo de mídia se necessário
-    if (galleryState.filters.mediaType && galleryState.filters.mediaType !== '') {
-      filteredPosts = filteredPosts.filter(post => {
-        const mediaType = post.media_type ? post.media_type.toLowerCase() : '';
-        const filterType = galleryState.filters.mediaType.toLowerCase();
+    // Aplicar filtros e ordenação
+    let filteredPosts = applyFilters(posts);
+    filteredPosts = sortPosts(filteredPosts);
 
-        // Normaliza tipos: 'image'/'sidecar' -> 'photo' (carrossel de fotos)
-        // Aceita tanto maiúsculas quanto minúsculas do banco
-        const normalizedMediaType = (mediaType === 'image' || mediaType === 'sidecar') ? 'photo' : mediaType;
-        const normalizedFilterType = filterType === 'image' ? 'photo' : filterType;
-
-        return normalizedMediaType === normalizedFilterType;
-      });
-    }
-
-    console.log(`[Gallery] Filtros aplicados - Platform: ${galleryState.filters.platform || 'todas'}, MediaType: ${galleryState.filters.mediaType || 'todos'}`);
-    console.log(`[Gallery] Posts retornados: ${posts.length}, Posts após filtros: ${filteredPosts.length}`);
+    console.log(`[Gallery] ${filteredPosts.length} posts após filtros`);
 
     galleryState.posts = filteredPosts;
     galleryState.displayedCount = 0;
+
+    // Atualizar contador de resultados
+    updateResultsCount(filteredPosts.length);
 
     renderGallery(filteredPosts);
   } catch (error) {
@@ -392,6 +462,22 @@ async function loadGalleryPosts() {
 }
 
 /**
+ * Reaplica filtros aos posts já carregados (mais rápido que recarregar da API)
+ */
+function reapplyFilters() {
+  let filteredPosts = applyFilters(galleryState.allPosts);
+  filteredPosts = sortPosts(filteredPosts);
+
+  console.log(`[Gallery] ${filteredPosts.length} posts após filtros`);
+
+  galleryState.posts = filteredPosts;
+  galleryState.displayedCount = 0;
+
+  updateResultsCount(filteredPosts.length);
+  renderGallery(filteredPosts);
+}
+
+/**
  * Carrega mais itens na galeria
  */
 function loadMoreGallery() {
@@ -399,19 +485,86 @@ function loadMoreGallery() {
 }
 
 /**
+ * Limpa todos os filtros
+ */
+function clearFilters() {
+  // Resetar estado dos filtros
+  galleryState.filters = {
+    platform: '',
+    mediaType: '',
+    sortBy: 'date-desc',
+    hashtag: '',
+    minLikes: '',
+    dateFrom: '',
+    dateTo: ''
+  };
+
+  // Resetar valores dos inputs
+  document.getElementById('gallery-platform-filter').value = '';
+  document.getElementById('gallery-media-type-filter').value = '';
+  document.getElementById('gallery-sort-filter').value = 'date-desc';
+  document.getElementById('gallery-hashtag-filter').value = '';
+  document.getElementById('gallery-min-likes').value = '';
+  document.getElementById('gallery-date-from').value = '';
+  document.getElementById('gallery-date-to').value = '';
+
+  // Reaplicar filtros (vazio = mostrar tudo)
+  reapplyFilters();
+}
+
+/**
  * Inicializa a galeria
  */
 function initGallery() {
-  // Event listeners para filtros
+  // Event listeners para filtros básicos
   document.getElementById('gallery-platform-filter')?.addEventListener('change', (e) => {
     galleryState.filters.platform = e.target.value;
-    loadGalleryPosts();
+    reapplyFilters();
   });
 
   document.getElementById('gallery-media-type-filter')?.addEventListener('change', (e) => {
     galleryState.filters.mediaType = e.target.value;
-    loadGalleryPosts();
+    reapplyFilters();
   });
+
+  document.getElementById('gallery-sort-filter')?.addEventListener('change', (e) => {
+    galleryState.filters.sortBy = e.target.value;
+    reapplyFilters();
+  });
+
+  // Event listener para hashtag com debounce
+  let hashtagTimeout;
+  document.getElementById('gallery-hashtag-filter')?.addEventListener('input', (e) => {
+    clearTimeout(hashtagTimeout);
+    hashtagTimeout = setTimeout(() => {
+      galleryState.filters.hashtag = e.target.value;
+      reapplyFilters();
+    }, 500); // Aguarda 500ms após parar de digitar
+  });
+
+  // Event listener para mínimo de curtidas
+  let likesTimeout;
+  document.getElementById('gallery-min-likes')?.addEventListener('input', (e) => {
+    clearTimeout(likesTimeout);
+    likesTimeout = setTimeout(() => {
+      galleryState.filters.minLikes = e.target.value;
+      reapplyFilters();
+    }, 500);
+  });
+
+  // Event listeners para datas
+  document.getElementById('gallery-date-from')?.addEventListener('change', (e) => {
+    galleryState.filters.dateFrom = e.target.value;
+    reapplyFilters();
+  });
+
+  document.getElementById('gallery-date-to')?.addEventListener('change', (e) => {
+    galleryState.filters.dateTo = e.target.value;
+    reapplyFilters();
+  });
+
+  // Event listener para botão de limpar filtros
+  document.getElementById('gallery-clear-filters')?.addEventListener('click', clearFilters);
 
   // Event listener para botão "Carregar Mais"
   document.getElementById('load-more-gallery')?.addEventListener('click', loadMoreGallery);

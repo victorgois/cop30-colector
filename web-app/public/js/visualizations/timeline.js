@@ -50,11 +50,30 @@ function renderTimeline(data) {
     .nice()
     .range([height, 0]);
 
-  // Eixos
+  // Eixos com formatação inteligente
+  // Para meses anteriores a novembro: mostrar nome do mês
+  // Para novembro: mostrar dias
+  const xAxis = d3.axisBottom(x)
+    .tickFormat(d => {
+      const date = new Date(d);
+      const month = date.getMonth(); // 0 = Janeiro, 10 = Novembro
+      const year = date.getFullYear();
+
+      // Se for novembro de 2025, mostrar dia
+      if (month === 10 && year === 2025) {
+        return date.getDate();
+      }
+
+      // Caso contrário, mostrar nome do mês abreviado
+      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+                          'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      return monthNames[month];
+    });
+
   svg.append('g')
     .attr('class', 'axis')
     .attr('transform', `translate(0,${height})`)
-    .call(d3.axisBottom(x).tickFormat(d3.timeFormat('%d/%m')));
+    .call(xAxis);
 
   svg.append('g')
     .attr('class', 'axis')
@@ -80,7 +99,7 @@ function renderTimeline(data) {
     .attr('cx', d => x(d.date))
     .attr('cy', d => y(d.posts_count))
     .attr('r', 4)
-    .attr('fill', '#667eea')
+    .attr('fill', '#FDB813')
     .on('mouseover', function(event, d) {
       d3.select(this).attr('r', 6);
       showTooltip(event, `Data: ${d3.timeFormat('%d/%m/%Y')(d.date)}<br>Posts: ${d.posts_count}`);
