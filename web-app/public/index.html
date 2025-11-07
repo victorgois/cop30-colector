@@ -22,6 +22,126 @@
     </header>
 
     <main class="container">
+        <!-- Apresentação -->
+        <section id="presentation">
+            <h2>
+                <span class="section-title">Sobre o SiMM</span>
+                <button class="toggle-section" data-target="presentation-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="presentation-content" class="section-content">
+                <p style="margin-bottom: 15px;">
+                    Este projeto faz parte da <strong>Rede SiMM </strong>, rede de Pesquisa em Semiótica, Interações e Materialidades Midiáticas. A Rede SiMM conecta grupos de pesquisa de universidades brasileiras e estrangeiras em pesquisas coletivas sobre mídias e comunicação. Desenvolvido com financiamento da <strong>FUNDEP</strong>,
+                    este sistema foi criado especificamente para monitorar, coletar e analisar dados sobre a <strong>COP30</strong>
+                    nas principais plataformas de redes sociais: <strong>Instagram</strong> e <strong>TikTok</strong>.
+                </p>
+                <p style="margin-bottom: 15px;">
+                    Este dashboard oferece uma visão abrangente e em tempo real das conversas, tendências e engajamento do público
+                    em torno da conferência climática. Utilizando técnicas avançadas de coleta de dados e visualização interativa,
+                    a plataforma permite identificar:
+                </p>
+                <ul style="margin-left: 20px; margin-bottom: 15px;">
+                    <li>Padrões de engajamento e distribuição temporal de posts</li>
+                    <li>Hashtags emergentes e tendências de discussão</li>
+                    <li>Influenciadores e perfis mais relevantes</li>
+                    <li>Narrativas dominantes e análise de discurso</li>
+                    <li>Comparativos entre plataformas e métricas de performance</li>
+                </ul>
+                <p style="margin-bottom: 15px;">
+                    Saiba mais sobre a Rede SiMM: <a href="https://redesimm.com.br/" target="_blank" rel="noopener noreferrer" style="color: #FDB813; font-weight: 600; text-decoration: none;">redesimm.com.br</a>
+                </p>
+                <p style="margin-bottom: 0;">
+                    Este projeto é <strong>código aberto</strong>. Acesse o repositório no GitHub:
+                    <a href="https://github.com/victorgois/cop30-colector" target="_blank" rel="noopener noreferrer" style="color: #FDB813; font-weight: 600; text-decoration: none;">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: text-bottom; margin-right: 4px;">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                        </svg>
+                        github.com/victorgois/cop30-colector
+                    </a>
+                </p>
+            </div>
+        </section>
+
+        <!-- Download de Dados -->
+        <section id="data-export">
+            <h2>
+                <span class="section-title">Download de Dados</span>
+                <button class="toggle-section" data-target="data-export-content" aria-label="Expandir/Recolher">▼</button>
+            </h2>
+            <div id="data-export-content" class="section-content">
+                <p style="color: #666; margin-bottom: 20px;">
+                    Exporte os dados coletados em diferentes formatos para análise externa. Configure filtros personalizados
+                    ou baixe o dataset completo.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <!-- Filtros de Exportação -->
+                    <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; border: 2px solid #ddd;">
+                        <h3 style="margin-bottom: 15px; font-size: 18px;">Filtros de Exportação</h3>
+
+                        <div style="margin-bottom: 15px;">
+                            <label for="export-platform" style="display: block; margin-bottom: 5px; font-weight: 600;">Plataforma:</label>
+                            <select id="export-platform" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="">Todas</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="tiktok">TikTok</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <label for="export-date-from" style="display: block; margin-bottom: 5px; font-weight: 600;">Data inicial:</label>
+                            <input type="date" id="export-date-from" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <label for="export-date-to" style="display: block; margin-bottom: 5px; font-weight: 600;">Data final:</label>
+                            <input type="date" id="export-date-to" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <label for="export-keyword" style="display: block; margin-bottom: 5px; font-weight: 600;">Palavra-chave:</label>
+                            <input type="text" id="export-keyword" placeholder="Ex: cop30, clima..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+
+                        <div style="margin-bottom: 0;">
+                            <label for="export-limit" style="display: block; margin-bottom: 5px; font-weight: 600;">Limite de registros:</label>
+                            <input type="number" id="export-limit" value="1000" min="1" max="10000" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <small style="color: #666;">Máximo: 10.000 registros</small>
+                        </div>
+                    </div>
+
+                    <!-- Opções de Download -->
+                    <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; border: 2px solid #ddd;">
+                        <h3 style="margin-bottom: 15px; font-size: 18px;">Formatos Disponíveis</h3>
+
+                        <button id="export-csv" class="export-btn" style="width: 100%; margin-bottom: 10px; padding: 12px; background: linear-gradient(135deg, #FDB813 0%, #FFC94D 100%); border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                            Download CSV
+                        </button>
+
+                        <button id="export-json" class="export-btn" style="width: 100%; margin-bottom: 10px; padding: 12px; background: linear-gradient(135deg, #000 0%, #333 100%); color: #FDB813; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                            Download JSON
+                        </button>
+
+                        <button id="export-full" class="export-btn" style="width: 100%; margin-bottom: 20px; padding: 12px; background: #fff; color: #000; border: 2px solid #FDB813; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                            Download Completo (CSV)
+                        </button>
+
+                        <div style="background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd;">
+                            <h4 style="margin-bottom: 10px; font-size: 14px; font-weight: 600;">Informações:</h4>
+                            <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #666; line-height: 1.6;">
+                                <li><strong>CSV:</strong> Ideal para Excel e análise de dados</li>
+                                <li><strong>JSON:</strong> Formato estruturado para programação</li>
+                                <li><strong>Completo:</strong> Todos os dados sem filtros (pode ser grande)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="export-status" style="padding: 15px; background: #f0f0f0; border-radius: 6px; text-align: center; display: none;">
+                    <p style="margin: 0; color: #666;">Preparando download...</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Dashboard de Métricas -->
         <section id="dashboard">
             <h2>
@@ -392,11 +512,26 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 Victor Góis. Licenciado sobre GNU GPL v3.0 </p>
+            <p style="margin-bottom: 10px;">
+                &copy; 2025 <a href="https://victorgois.info/" target="_blank" rel="noopener noreferrer" style="color: #FDB813; text-decoration: none; font-weight: 600;">Victor Góis</a>. Licenciado sobre GNU GPL v3.0
+            </p>
+            <p style="margin: 0;">
+                Projeto desenvolvido pelo
+                <a href="https://redesimm.com.br/" target="_blank" rel="noopener noreferrer" style="color: #FDB813; text-decoration: none; font-weight: 600;">SiMM</a>
+                com financiamento da FUNDEP
+                <span style="margin: 0 8px;">|</span>
+                <a href="https://github.com/victorgois/cop30-colector" target="_blank" rel="noopener noreferrer" style="color: #FDB813; text-decoration: none; font-weight: 600;">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: text-bottom; margin-right: 4px;">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    Repositório GitHub
+                </a>
+            </p>
         </div>
     </footer>
 
     <script src="js/api-client.js"></script>
+    <script src="js/data-export.js"></script>
     <script src="js/visualizations/collection-history.js"></script>
     <script src="js/visualizations/timeline.js"></script>
     <script src="js/visualizations/latency-analysis.js"></script>
