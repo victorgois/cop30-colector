@@ -1,135 +1,179 @@
-// Menu de navegação entre seções
+// Menu de navegação interativo e minimalista
 
-function initNavigationMenu() {
+(function() {
+  'use strict';
+
   // Criar estrutura do menu
-  const menuHTML = `
-    <div id="nav-menu" class="nav-menu">
-      <button id="nav-toggle" class="nav-toggle" aria-label="Abrir menu de navegação">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+  function createNavigationMenu() {
+    // Botão toggle
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'nav-toggle';
+    toggleBtn.setAttribute('aria-label', 'Toggle navigation menu');
+    toggleBtn.innerHTML = '<span></span>';
 
-      <nav id="nav-sidebar" class="nav-sidebar">
-        <div class="nav-header">
-          <h3>Navegação</h3>
-          <button id="nav-close" class="nav-close" aria-label="Fechar menu">&times;</button>
-        </div>
+    // Container do menu
+    const navMenu = document.createElement('nav');
+    navMenu.className = 'nav-menu hidden';
+    navMenu.setAttribute('aria-label', 'Section navigation');
 
-        <ul class="nav-list">
-          <li><a href="#presentation" class="nav-link" data-section="presentation">Sobre o SiMM</a></li>
-          <li><a href="#data-export" class="nav-link" data-section="data-export">Download de Dados</a></li>
-          <li><a href="#dashboard" class="nav-link" data-section="dashboard">Dashboard de Métricas</a></li>
-          <li><a href="#collection-history-section" class="nav-link" data-section="collection-history-section">Histórico de Coletas</a></li>
-          <li><a href="#likes-timeline-section" class="nav-link" data-section="likes-timeline-section">Timeline de Likes</a></li>
-          <li><a href="#hashtag-cloud-section" class="nav-link" data-section="hashtag-cloud-section">Nuvem de Hashtags</a></li>
-          <li><a href="#hashtag-network-section" class="nav-link" data-section="hashtag-network-section">Rede de Hashtags</a></li>
-          <li><a href="#engagement-section" class="nav-link" data-section="engagement-section">Distribuição de Engajamento</a></li>
-          <li><a href="#influencers-section" class="nav-link" data-section="influencers-section">Top Influenciadores</a></li>
-          <li><a href="#platform-comparison-section" class="nav-link" data-section="platform-comparison-section">Comparativo de Plataformas</a></li>
-          <li><a href="#content-performance-section" class="nav-link" data-section="content-performance-section">Performance de Conteúdo</a></li>
-          <li><a href="#temporal-heatmap-section" class="nav-link" data-section="temporal-heatmap-section">Atividade Temporal</a></li>
-          <li><a href="#hashtag-dashboard-section" class="nav-link" data-section="hashtag-dashboard-section">Dashboard de Hashtags</a></li>
-          <li><a href="#narrative-analysis-section" class="nav-link" data-section="narrative-analysis-section">Análise de Narrativas</a></li>
-          <li><a href="#timeline-section" class="nav-link" data-section="timeline-section">Timeline de Posts</a></li>
-          <li><a href="#gallery-section" class="nav-link" data-section="gallery-section">Galeria de Mídia</a></li>
-        </ul>
-      </nav>
+    // Lista de itens do menu
+    const navList = document.createElement('ul');
+    navList.className = 'nav-menu-items';
 
-      <div id="nav-overlay" class="nav-overlay"></div>
-    </div>
-  `;
+    // Definir seções do menu (agrupadas tematicamente)
+    const sections = [
+      // Informações Gerais
+      { id: 'presentation', title: 'Sobre o SiMM' },
+      { id: 'data-export', title: 'Download de Dados' },
+      { id: 'dashboard', title: 'Dashboard de Métricas' },
+      { id: 'collection-history-section', title: 'Histórico de Coletas' },
 
-  // Inserir no início do body
-  document.body.insertAdjacentHTML('afterbegin', menuHTML);
+      // Análise de Hashtags
+      { id: 'hashtags-section', title: 'Hashtags Mais Usadas' },
+      { id: 'network-section', title: 'Rede de Hashtags' },
+      { id: 'hashtag-dashboard-section', title: 'Dashboard de Hashtags' },
 
-  // Event listeners
-  const toggle = document.getElementById('nav-toggle');
-  const sidebar = document.getElementById('nav-sidebar');
-  const overlay = document.getElementById('nav-overlay');
-  const closeBtn = document.getElementById('nav-close');
-  const navLinks = document.querySelectorAll('.nav-link');
+      // Engajamento e Influência
+      { id: 'likes-timeline-section', title: 'Timeline de Likes' },
+      { id: 'influencers-section', title: 'Top Influenciadores' },
+      { id: 'content-performance-section', title: 'Performance de Conteúdo' },
 
-  // Abrir menu
-  toggle.addEventListener('click', () => {
-    sidebar.classList.add('open');
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  });
+      // Análise Comparativa e Temporal
+      { id: 'platform-comparison-section', title: 'Comparativo de Plataformas' },
+      { id: 'temporal-heatmap-section', title: 'Atividade Temporal' },
 
-  // Fechar menu
-  function closeMenu() {
-    sidebar.classList.remove('open');
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-  }
+      // Análise de Conteúdo
+      { id: 'narrative-analysis-section', title: 'Análise de Narrativas' },
+      { id: 'gallery-section', title: 'Galeria de Mídia' }
+    ];
 
-  closeBtn.addEventListener('click', closeMenu);
-  overlay.addEventListener('click', closeMenu);
+    // Criar itens do menu
+    sections.forEach(section => {
+      const sectionElement = document.getElementById(section.id);
+      if (sectionElement) {
+        const li = document.createElement('li');
+        li.className = 'nav-menu-item';
 
-  // Navegação com scroll suave
-  navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
+        const link = document.createElement('a');
+        link.className = 'nav-menu-link';
+        link.href = `#${section.id}`;
+        link.textContent = section.title;
+        link.setAttribute('data-section', section.id);
 
-      const targetId = link.getAttribute('data-section');
-      const targetSection = document.getElementById(targetId);
-
-      if (targetSection) {
-        // Fechar menu
-        closeMenu();
-
-        // Expandir seção se estiver colapsada
-        const content = targetSection.querySelector('.section-content');
-        const toggleBtn = targetSection.querySelector('.toggle-section');
-
-        if (content && content.classList.contains('collapsed')) {
-          toggleBtn.click();
-        }
-
-        // Scroll suave com offset para header
-        setTimeout(() => {
-          const headerOffset = 80;
-          const elementPosition = targetSection.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
-        }, 100);
+        li.appendChild(link);
+        navList.appendChild(li);
       }
     });
-  });
 
-  // Highlight da seção atual durante scroll
-  highlightCurrentSection();
-  window.addEventListener('scroll', highlightCurrentSection);
-}
+    navMenu.appendChild(navList);
+    document.body.appendChild(toggleBtn);
+    document.body.appendChild(navMenu);
 
-function highlightCurrentSection() {
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav-link');
+    return { toggleBtn, navMenu };
+  }
 
-  let currentSection = '';
-  const scrollPosition = window.pageYOffset + 150;
+  // Inicializar menu
+  function initNavigationMenu() {
+    const { toggleBtn, navMenu } = createNavigationMenu();
 
-  sections.forEach(section => {
-    const sectionTop = section.offsetTop;
-    const sectionHeight = section.clientHeight;
+    // Toggle menu
+    toggleBtn.addEventListener('click', () => {
+      const isHidden = navMenu.classList.contains('hidden');
+      navMenu.classList.toggle('hidden');
+      toggleBtn.classList.toggle('active');
+      toggleBtn.setAttribute('aria-expanded', isHidden);
+    });
 
-    if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-      currentSection = section.getAttribute('id');
-    }
-  });
+    // Navegação suave e fechar menu ao clicar
+    const navLinks = navMenu.querySelectorAll('.nav-menu-link');
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sectionId = link.getAttribute('data-section');
+        const section = document.getElementById(sectionId);
 
-  navLinks.forEach(link => {
-    link.classList.remove('active');
-    if (link.getAttribute('data-section') === currentSection) {
-      link.classList.add('active');
-    }
-  });
-}
+        if (section) {
+          // Expandir seção se estiver colapsada
+          const content = section.querySelector('.section-content');
+          if (content && content.classList.contains('collapsed')) {
+            const toggleButton = section.querySelector('.toggle-section');
+            if (toggleButton) {
+              toggleButton.click();
+            }
+          }
 
-// Inicializar quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', initNavigationMenu);
+          // Scroll suave
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+          // Fechar menu em dispositivos móveis
+          if (window.innerWidth <= 768) {
+            navMenu.classList.add('hidden');
+            toggleBtn.classList.remove('active');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+          }
+
+          // Atualizar item ativo
+          navLinks.forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Destacar seção ativa ao rolar
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -70% 0px',
+      threshold: 0
+    };
+
+    const observerCallback = (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
+          navLinks.forEach(link => {
+            if (link.getAttribute('data-section') === sectionId) {
+              navLinks.forEach(l => l.classList.remove('active'));
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // Observar todas as seções
+    document.querySelectorAll('main section').forEach(section => {
+      if (section.id) {
+        observer.observe(section);
+      }
+    });
+
+    // Fechar menu ao clicar fora
+    document.addEventListener('click', (e) => {
+      if (!navMenu.contains(e.target) && !toggleBtn.contains(e.target)) {
+        if (!navMenu.classList.contains('hidden')) {
+          navMenu.classList.add('hidden');
+          toggleBtn.classList.remove('active');
+          toggleBtn.setAttribute('aria-expanded', 'false');
+        }
+      }
+    });
+
+    // Fechar menu com tecla ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !navMenu.classList.contains('hidden')) {
+        navMenu.classList.add('hidden');
+        toggleBtn.classList.remove('active');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  // Inicializar quando o DOM estiver pronto
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNavigationMenu);
+  } else {
+    initNavigationMenu();
+  }
+})();

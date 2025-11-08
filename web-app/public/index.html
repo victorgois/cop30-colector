@@ -26,7 +26,7 @@
         <section id="presentation">
             <h2>
                 <span class="section-title">Sobre o SiMM</span>
-                <button class="toggle-section" data-target="presentation-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="presentation-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="presentation-content" class="section-content">
                 <p style="margin-bottom: 15px;">
@@ -65,7 +65,7 @@
         <section id="data-export">
             <h2>
                 <span class="section-title">Download de Dados</span>
-                <button class="toggle-section" data-target="data-export-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="data-export-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="data-export-content" class="section-content">
                 <p style="color: #666; margin-bottom: 20px;">
@@ -146,7 +146,7 @@
         <section id="dashboard">
             <h2>
                 <span class="section-title">Dashboard de Métricas</span>
-                <button class="toggle-section" data-target="dashboard-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="dashboard-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="dashboard-content" class="section-content">
 
@@ -213,7 +213,7 @@
         <section id="collection-history-section">
             <h2>
                 <span class="section-title">Histórico de Coletas</span>
-                <button class="toggle-section" data-target="collection-history-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="collection-history-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="collection-history-content" class="section-content">
             <p style="color: #666; margin-bottom: 15px;">
@@ -230,7 +230,7 @@
 <!--         <section id="latency-section">
             <h2>
                 <span class="section-title">Análise de Latência: Postagem vs Coleta</span>
-                <button class="toggle-section" data-target="latency-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="latency-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="latency-content" class="section-content">
             <p style="color: #666; margin-bottom: 15px;">
@@ -250,11 +250,56 @@
             </div>
         </section> -->
 
+        <!-- ========== ANÁLISE DE HASHTAGS ========== -->
+
+        <!-- Nuvem de Hashtags -->
+        <section id="hashtags-section">
+            <h2>
+                <span class="section-title">Hashtags Mais Usadas</span>
+                <button class="toggle-section" data-target="hashtags-content" aria-label="Recolher seção">▲</button>
+            </h2>
+            <div id="hashtags-content" class="section-content">
+            <div id="hashtag-cloud"></div>
+            </div>
+        </section>
+
+        <!-- Rede de Hashtags -->
+        <section id="network-section">
+            <h2>
+                <span class="section-title">Rede de Relacionamento de Hashtags</span>
+                <button class="toggle-section" data-target="network-content" aria-label="Recolher seção">▲</button>
+            </h2>
+            <div id="network-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Visualização de hashtags que aparecem juntas nos mesmos posts.
+                Nós maiores = hashtags mais usadas. Linhas mais grossas = maior frequência de co-ocorrência.
+            </p>
+            <div id="hashtag-network"></div>
+            </div>
+        </section>
+
+        <!-- Dashboard Avançado de Hashtags -->
+        <section id="hashtag-dashboard-section">
+            <h2>
+                <span class="section-title">Dashboard Avançado de Hashtags</span>
+                <button class="toggle-section" data-target="hashtag-dashboard-content" aria-label="Recolher seção">▲</button>
+            </h2>
+            <div id="hashtag-dashboard-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Análise profunda de hashtags: identifica hashtags emergentes com maior crescimento
+                e acompanha a evolução temporal de hashtags específicas ao longo do tempo.
+            </p>
+            <div id="hashtag-dashboard-chart"></div>
+            </div>
+        </section>
+
+        <!-- ========== ANÁLISE DE ENGAJAMENTO E INFLUÊNCIA ========== -->
+
         <!-- Timeline de Likes -->
         <section id="likes-timeline-section">
             <h2>
                 <span class="section-title">Timeline de Likes por Data de Postagem</span>
-                <button class="toggle-section" data-target="likes-timeline-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="likes-timeline-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="likes-timeline-content" class="section-content">
             <p style="color: #666; margin-bottom: 15px;">
@@ -274,59 +319,19 @@
             </div>
         </section>
 
-        <!-- Nuvem de Hashtags -->
-        <section id="hashtags-section">
-            <h2>
-                <span class="section-title">Hashtags Mais Usadas</span>
-                <button class="toggle-section" data-target="hashtags-content" aria-label="Expandir/Recolher">▼</button>
-            </h2>
-            <div id="hashtags-content" class="section-content">
-            <div id="hashtag-cloud"></div>
-            </div>
-        </section>
-
-        <!-- Rede de Hashtags -->
-        <section id="network-section">
-            <h2>
-                <span class="section-title">Rede de Relacionamento de Hashtags</span>
-                <button class="toggle-section" data-target="network-content" aria-label="Expandir/Recolher">▼</button>
-            </h2>
-            <div id="network-content" class="section-content">
-            <p style="color: #666; margin-bottom: 15px;">
-                Visualização de hashtags que aparecem juntas nos mesmos posts.
-                Nós maiores = hashtags mais usadas. Linhas mais grossas = maior frequência de co-ocorrência.
-            </p>
-            <div id="hashtag-network"></div>
-            </div>
-        </section>
-
         <!-- Análise de Influenciadores -->
         <section id="influencers-section">
             <h2>
                 <span class="section-title">Top Influenciadores por Engajamento</span>
-                <button class="toggle-section" data-target="influencers-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="influencers-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="influencers-content" class="section-content">
             <p style="color: #666; margin-bottom: 15px;">
-                Ranking dos usuários com maior engajamento total (likes + comentários) na discussão sobre COP30.
+                Ranking dos usuários com maior engajamento total na discussão sobre COP30.
+                <strong>Engajamento</strong> é calculado como a soma de <strong>likes + comentários</strong> recebidos nos posts.
                 Identifica quem está movendo a conversa e gerando mais interações.
             </p>
             <div id="influencers-chart"></div>
-            </div>
-        </section>
-
-        <!-- Comparativo entre Plataformas -->
-        <section id="platform-comparison-section">
-            <h2>
-                <span class="section-title">Comparativo Instagram vs TikTok</span>
-                <button class="toggle-section" data-target="platform-comparison-content" aria-label="Expandir/Recolher">▼</button>
-            </h2>
-            <div id="platform-comparison-content" class="section-content">
-            <p style="color: #666; margin-bottom: 15px;">
-                Análise comparativa detalhada entre Instagram e TikTok: engajamento, tipos de conteúdo,
-                uso de hashtags e comportamento do público em cada plataforma.
-            </p>
-            <div id="platform-comparison-chart"></div>
             </div>
         </section>
 
@@ -334,14 +339,32 @@
         <section id="content-performance-section">
             <h2>
                 <span class="section-title">Análise de Performance de Conteúdo</span>
-                <button class="toggle-section" data-target="content-performance-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="content-performance-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="content-performance-content" class="section-content">
             <p style="color: #666; margin-bottom: 15px;">
-                Distribuição de engajamento, correlação entre hashtags e performance,
-                e identificação de posts que geram mais discussão (alta razão comentários/likes).
+                <strong>Engajamento total = likes + comentários.</strong> Esta seção analisa a distribuição de engajamento,
+                correlação entre quantidade de hashtags e performance dos posts,
+                e identifica publicações que geram mais discussão (alta razão comentários/likes).
             </p>
             <div id="content-performance-chart"></div>
+            </div>
+        </section>
+
+        <!-- ========== ANÁLISE COMPARATIVA E TEMPORAL ========== -->
+
+        <!-- Comparativo entre Plataformas -->
+        <section id="platform-comparison-section">
+            <h2>
+                <span class="section-title">Comparativo Instagram vs TikTok</span>
+                <button class="toggle-section" data-target="platform-comparison-content" aria-label="Recolher seção">▲</button>
+            </h2>
+            <div id="platform-comparison-content" class="section-content">
+            <p style="color: #666; margin-bottom: 15px;">
+                Análise comparativa detalhada entre Instagram e TikTok: engajamento (likes + comentários), tipos de conteúdo,
+                uso de hashtags e comportamento do público em cada plataforma.
+            </p>
+            <div id="platform-comparison-chart"></div>
             </div>
         </section>
 
@@ -349,7 +372,7 @@
         <section id="temporal-heatmap-section">
             <h2>
                 <span class="section-title">Atividade Temporal (Heatmap)</span>
-                <button class="toggle-section" data-target="temporal-heatmap-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="temporal-heatmap-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="temporal-heatmap-content" class="section-content">
             <p style="color: #666; margin-bottom: 15px;">
@@ -360,26 +383,13 @@
             </div>
         </section>
 
-        <!-- Dashboard Avançado de Hashtags -->
-        <section id="hashtag-dashboard-section">
-            <h2>
-                <span class="section-title">Dashboard Avançado de Hashtags</span>
-                <button class="toggle-section" data-target="hashtag-dashboard-content" aria-label="Expandir/Recolher">▼</button>
-            </h2>
-            <div id="hashtag-dashboard-content" class="section-content">
-            <p style="color: #666; margin-bottom: 15px;">
-                Análise profunda de hashtags: identifica hashtags emergentes com maior crescimento
-                e acompanha a evolução temporal de hashtags específicas ao longo do tempo.
-            </p>
-            <div id="hashtag-dashboard-chart"></div>
-            </div>
-        </section>
+        <!-- ========== ANÁLISE DE CONTEÚDO ========== -->
 
         <!-- Análise de Narrativas -->
         <section id="narrative-analysis-section">
             <h2>
                 <span class="section-title">Análise de Narrativas e Discurso</span>
-                <button class="toggle-section" data-target="narrative-analysis-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="narrative-analysis-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="narrative-analysis-content" class="section-content">
             <p style="color: #666; margin-bottom: 15px;">
@@ -390,28 +400,11 @@
             </div>
         </section>
 
-        <!-- Timeline de Posts -->
-        <section id="timeline-section">
-            <h2>
-                <span class="section-title">Timeline de Posts</span>
-                <button class="toggle-section" data-target="timeline-content" aria-label="Expandir/Recolher">▼</button>
-            </h2>
-            <div id="timeline-content" class="section-content">
-            <div class="filters">
-                <select id="platform-filter">
-                    <option value="">Todas as plataformas</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="tiktok">TikTok</option>
-                </select>
-            </div>
-            <div id="timeline-chart"></div>
-            </div>
-        </section>
         <!-- Top Posts -->
         <!-- <section id="top-posts-section">
             <h2>
                 <span class="section-title">Posts com Maior Engajamento</span>
-                <button class="toggle-section" data-target="top-posts-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="top-posts-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="top-posts-content" class="section-content">
             <div class="filters">
@@ -438,7 +431,7 @@
         <section id="gallery-section">
             <h2>
                 <span class="section-title">Galeria de Imagens e Vídeos</span>
-                <button class="toggle-section" data-target="gallery-content" aria-label="Expandir/Recolher">▼</button>
+                <button class="toggle-section" data-target="gallery-content" aria-label="Recolher seção">▲</button>
             </h2>
             <div id="gallery-content" class="section-content">
             <div class="gallery-filters-container">
@@ -513,7 +506,7 @@
     <footer>
         <div class="container">
             <p style="margin-bottom: 10px;">
-                &copy; 2025 <a href="https://victorgois.info/" target="_blank" rel="noopener noreferrer" style="color: #FDB813; text-decoration: none; font-weight: 600;">Victor Góis</a>. Licenciado sobre GNU GPL v3.0
+                &copy; 2025 <a href="https://victorgois.info/" target="_blank" rel="noopener noreferrer" style="color: #FDB813; text-decoration: none; font-weight: 600;">Victor Góis</a>. Licenciado sob GNU GPL v3.0
             </p>
             <p style="margin: 0;">
                 Projeto desenvolvido pelo
@@ -530,6 +523,7 @@
         </div>
     </footer>
 
+    <script src="js/navigation-menu.js"></script>
     <script src="js/api-client.js"></script>
     <script src="js/data-export.js"></script>
     <script src="js/visualizations/collection-history.js"></script>

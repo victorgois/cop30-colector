@@ -12,10 +12,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadCollectionHistory();
     console.log('[Main] ✓ Histórico de coletas carregado');
 
-    console.log('[Main] Carregando timeline...');
-    await loadTimeline();
-    console.log('[Main] ✓ Timeline carregada');
-
     console.log('[Main] Carregando análise de latência...');
 /*     await loadLatencyAnalysis();
     console.log('[Main] ✓ Análise de latência carregada'); */
@@ -141,23 +137,6 @@ async function loadCollectionHistory() {
   } catch (error) {
     console.error('[CollectionHistory] Erro:', error);
     throw new Error(`CollectionHistory: ${error.message}`);
-  }
-}
-
-// Carregar timeline
-async function loadTimeline() {
-  try {
-    const platform = document.getElementById('platform-filter')?.value || null;
-    const data = await apiClient.getTimeline('day', platform);
-
-    if (window.renderTimeline) {
-      window.renderTimeline(data);
-    } else {
-      console.warn('[Timeline] renderTimeline não está disponível');
-    }
-  } catch (error) {
-    console.error('[Timeline] Erro:', error);
-    throw new Error(`Timeline: ${error.message}`);
   }
 }
 
@@ -340,14 +319,9 @@ async function loadNarrativeAnalysis() {
 
 // Configurar filtros
 function setupFilters() {
-  const platformFilter = document.getElementById('platform-filter');
   const metricFilter = document.getElementById('metric-filter');
   const latencyPlatformFilter = document.getElementById('latency-platform-filter');
   const likesPlatformFilter = document.getElementById('likes-platform-filter');
-
-  if (platformFilter) {
-    platformFilter.addEventListener('change', loadTimeline);
-  }
 
   if (metricFilter) {
     metricFilter.addEventListener('change', loadTopPosts);
@@ -398,12 +372,12 @@ function initSectionToggles() {
       button.classList.toggle('collapsed');
       content.classList.toggle('collapsed');
 
-      // Atualizar ícone
+      // Atualizar ícone (invertido: collapsed = fechado = seta pra baixo para expandir)
       if (button.classList.contains('collapsed')) {
-        button.textContent = '▶';
+        button.textContent = '▼';
         button.setAttribute('aria-label', 'Expandir seção');
       } else {
-        button.textContent = '▼';
+        button.textContent = '▲';
         button.setAttribute('aria-label', 'Recolher seção');
       }
     });

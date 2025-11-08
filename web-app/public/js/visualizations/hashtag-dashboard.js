@@ -290,7 +290,7 @@ function renderEvolutionChart(data, hashtags) {
           `<strong>#${d.hashtag}</strong><br>` +
           `Data: ${new Date(d.date).toLocaleDateString('pt-BR')}<br>` +
           `Posts: ${parseInt(d.usage_count).toLocaleString('pt-BR')}<br>` +
-          `Engajamento: ${parseInt(d.total_engagement || 0).toLocaleString('pt-BR')}`
+          `Engajamento (likes+comentários): ${parseInt(d.total_engagement || 0).toLocaleString('pt-BR')}`
         );
       })
       .on('mouseout', function() {
