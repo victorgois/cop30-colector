@@ -8,21 +8,28 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     line-height: 1.6;
     color: #333;
-    background-color: #f5f5f5;
+    background-color: #ffffff;
     scroll-behavior: smooth;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 40px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 20px;
+    }
 }
 
 header {
-    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    background: #000;
     color: white;
-    padding: 2rem 0;
-    margin-bottom: 2rem;
+    padding: 3rem 0 2rem 0;
+    margin-bottom: 3rem;
+    border-bottom: 3px solid #FDB813;
 }
 
 .header-content {
@@ -52,18 +59,24 @@ header h1 {
 }
 
 main section {
-    background: white;
-    margin-bottom: 2rem;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: transparent;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+main section:last-of-type {
+    border-bottom: none;
 }
 
 h2 {
-    color: black;
+    color: #000;
     margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #FDB813;
+    padding-bottom: 0;
+    border-bottom: none;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 /* Dashboard Metrics */
@@ -75,11 +88,13 @@ h2 {
 }
 
 .metric-card {
-    background: linear-gradient(135deg, #FDB813 0%, #FFC94D 100%);
+    background: #fafafa;
     color: #000000;
     padding: 1.5rem;
-    border-radius: 8px;
+    border-radius: 4px;
     text-align: center;
+    border: 1px solid #e8e8e8;
+    border-left: 3px solid #FDB813;
 }
 
 .metric-card h3 {
@@ -166,11 +181,23 @@ h2 {
 }
 
 .filters select {
-    padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    font-size: 0.95rem;
     cursor: pointer;
+    background: #fafafa;
+    transition: border-color 0.2s ease;
+}
+
+.filters select:hover {
+    border-color: #FDB813;
+}
+
+.filters select:focus {
+    outline: none;
+    border-color: #FDB813;
+    background: #fff;
 }
 
 /* Charts */
@@ -200,11 +227,12 @@ h2 {
 
 /* Footer */
 footer {
-    background: #333;
+    background: #000;
     color: white;
     text-align: center;
-    padding: 1.5rem 0;
-    margin-top: 3rem;
+    padding: 2.5rem 0;
+    margin-top: 4rem;
+    border-top: 3px solid #FDB813;
 }
 
 /* Responsive */
@@ -406,23 +434,25 @@ footer {
     display: block;
     margin: 2rem auto 0;
     padding: 0.75rem 2rem;
-    background: linear-gradient(135deg, #FDB813 0%, #FFC94D 100%);
-    color: #000000;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
+    background: #000;
+    color: #FDB813;
+    border: 2px solid #FDB813;
+    border-radius: 2px;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .load-more-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(253, 184, 19, 0.4);
+    background: #FDB813;
+    color: #000;
 }
 
 .load-more-btn:active {
-    transform: translateY(0);
+    transform: scale(0.98);
 }
 
 .no-data,
@@ -636,23 +666,24 @@ section h2 {
     right: 0;
     width: 2.5rem;
     height: 2.5rem;
-    background: linear-gradient(135deg, #FDB813 0%, #FFC94D 100%);
-    color: #000000;
-    border: none;
+    background: #fff;
+    color: #000;
+    border: 2px solid #e0e0e0;
     border-radius: 50%;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: bold;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.2s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
 }
 
 .toggle-section:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(253, 184, 19, 0.4);
+    border-color: #FDB813;
+    color: #FDB813;
+    background: #fffbf0;
 }
 
 .toggle-section:active {
@@ -794,6 +825,48 @@ section h2 {
     }
 }
 
+
+/* Espaçamento entre grupos temáticos */
+main section[id*="-section"]:first-of-type {
+    padding-top: 3rem;
+}
+
+/* Primeiro elemento de cada grupo temático tem mais espaço */
+main > section:has(+ section) {
+    margin-bottom: 2rem;
+}
+
+/* Melhorar cards internos para manter hierarquia visual */
+.comparison-card,
+.performance-section,
+.metric-card {
+    background: #fafafa;
+    border: 1px solid #e8e8e8;
+    box-shadow: none;
+}
+
+/* Tipografia estilo editorial */
+h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    color: #000;
+}
+
+h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #333;
+}
+
+p {
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
 /* Navigation Menu */
 .nav-menu {
     position: fixed;
@@ -878,20 +951,26 @@ section h2 {
     z-index: 1001;
     width: 50px;
     height: 50px;
-    background: linear-gradient(135deg, #FDB813 0%, #FFC94D 100%);
-    border: none;
+    background: #000;
+    border: 2px solid #FDB813;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(253, 184, 19, 0.4);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
 }
 
 .nav-toggle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(253, 184, 19, 0.5);
+    background: #FDB813;
+    transform: scale(1.05);
+}
+
+.nav-toggle:hover span,
+.nav-toggle:hover span::before,
+.nav-toggle:hover span::after {
+    background: #000;
 }
 
 .nav-toggle:active {
@@ -902,7 +981,7 @@ section h2 {
     display: block;
     width: 24px;
     height: 2px;
-    background: #000;
+    background: #FDB813;
     position: relative;
     transition: all 0.3s ease;
 }
@@ -913,7 +992,7 @@ section h2 {
     position: absolute;
     width: 24px;
     height: 2px;
-    background: #000;
+    background: #FDB813;
     transition: all 0.3s ease;
 }
 
