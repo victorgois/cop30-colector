@@ -26,21 +26,37 @@ const postsQuery = new PostsQuery(pool);
 router.get('/health', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW() as time, COUNT(*) as post_count FROM posts');
+
+    // Extrair host da connection string de forma segura
+    let dbHost = 'unknown';
+    if (process.env.DATABASE_URL) {
+      const match = process.env.DATABASE_URL.match(/@([^:\/]+)/);
+      dbHost = match ? match[1] : 'parse error';
+    }
+
     res.json({
       status: 'ok',
       database: 'connected',
       timestamp: result.rows[0].time,
       posts: result.rows[0].post_count,
       database_url_configured: !!process.env.DATABASE_URL,
-      database_host: process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).hostname : 'not configured'
+      database_host: dbHost
     });
   } catch (error) {
+    // Extrair host da connection string de forma segura mesmo em caso de erro
+    let dbHost = 'unknown';
+    if (process.env.DATABASE_URL) {
+      const match = process.env.DATABASE_URL.match(/@([^:\/]+)/);
+      dbHost = match ? match[1] : 'parse error';
+    }
+
     res.status(500).json({
       status: 'error',
       database: 'disconnected',
       error: error.message,
       code: error.code,
-      database_url_configured: !!process.env.DATABASE_URL
+      database_url_configured: !!process.env.DATABASE_URL,
+      database_host: dbHost
     });
   }
 });
