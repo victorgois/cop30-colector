@@ -1,13 +1,17 @@
 require('dotenv').config();
 const { Pool } = require('pg');
 
-// Detectar se é Render ou outro serviço que requer SSL
-const isRenderDB = process.env.DATABASE_URL && process.env.DATABASE_URL.includes('render.com');
+// Detectar se é um serviço de cloud que requer SSL (Render, Supabase, etc)
+const isCloudDB = process.env.DATABASE_URL && (
+  process.env.DATABASE_URL.includes('render.com') ||
+  process.env.DATABASE_URL.includes('supabase.co') ||
+  process.env.DATABASE_URL.includes('supabase.com')
+);
 
 // Criar pool de conexões PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: (process.env.NODE_ENV === 'production' || isRenderDB)
+  ssl: (process.env.NODE_ENV === 'production' || isCloudDB)
     ? { rejectUnauthorized: false }
     : false
 });

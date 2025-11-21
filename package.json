@@ -13,6 +13,9 @@
     "db:migrate": "node database/migrations/run.js",
     "db:stats": "node check-database-stats.js",
     "db:update-timeline": "node update-timeline-view.js",
+    "db:export": "node scripts/export-from-render.js",
+    "db:import": "node scripts/import-to-supabase.js",
+    "db:keep-alive": "node scripts/keep-database-alive.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
