@@ -17,7 +17,15 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: (process.env.NODE_ENV === 'production' || isCloudDB)
     ? { rejectUnauthorized: false }
-    : false
+    : false,
+  // Força IPv4 para evitar problemas de ENETUNREACH
+  host: process.env.DATABASE_URL ?
+    (() => {
+      const match = process.env.DATABASE_URL.match(/@([^:\/]+)/);
+      return match ? match[1] : undefined;
+    })() : undefined,
+  // Adiciona configuração explícita de família de endereço
+  ...(process.env.NODE_ENV === 'production' && { family: 4 })
 });
 
 const postsQuery = new PostsQuery(pool);
