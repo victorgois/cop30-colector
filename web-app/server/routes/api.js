@@ -22,6 +22,29 @@ const pool = new Pool({
 
 const postsQuery = new PostsQuery(pool);
 
+// GET /api/health - Health check e teste de conexão
+router.get('/health', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW() as time, COUNT(*) as post_count FROM posts');
+    res.json({
+      status: 'ok',
+      database: 'connected',
+      timestamp: result.rows[0].time,
+      posts: result.rows[0].post_count,
+      database_url_configured: !!process.env.DATABASE_URL,
+      database_host: process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).hostname : 'not configured'
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      database: 'disconnected',
+      error: error.message,
+      code: error.code,
+      database_url_configured: !!process.env.DATABASE_URL
+    });
+  }
+});
+
 // GET /api/posts - Lista posts com filtros
 router.get('/posts', async (req, res) => {
   try {
@@ -46,11 +69,18 @@ router.get('/posts', async (req, res) => {
 // GET /api/stats - Estatísticas gerais
 router.get('/stats', async (req, res) => {
   try {
+    console.log('[API] Buscando estatísticas...');
+    console.log('[API] DATABASE_URL configurada:', !!process.env.DATABASE_URL);
     const stats = await postsQuery.getStats();
+    console.log('[API] Estatísticas encontradas:', stats.length, 'registros');
     res.json(stats);
   } catch (error) {
     console.error('Erro ao buscar estatísticas:', error);
-    res.status(500).json({ error: 'Erro ao buscar estatísticas' });
+    console.error('Stack:', error.stack);
+    res.status(500).json({
+      error: 'Erro ao buscar estatísticas',
+      details: process.env.NODE_ENV === 'production' ? undefined : error.message
+    });
   }
 });
 
