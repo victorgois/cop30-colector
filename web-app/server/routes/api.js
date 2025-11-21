@@ -6,9 +6,18 @@ const fs = require('fs');
 const path = require('path');
 
 // Configurar pool de conexão PostgreSQL
+// Detectar se é um serviço de cloud que requer SSL (Render, Supabase, etc)
+const isCloudDB = process.env.DATABASE_URL && (
+  process.env.DATABASE_URL.includes('render.com') ||
+  process.env.DATABASE_URL.includes('supabase.co') ||
+  process.env.DATABASE_URL.includes('supabase.com')
+);
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: (process.env.NODE_ENV === 'production' || isCloudDB)
+    ? { rejectUnauthorized: false }
+    : false
 });
 
 const postsQuery = new PostsQuery(pool);
