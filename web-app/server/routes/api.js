@@ -22,17 +22,42 @@ const pool = new Pool({
 
 const postsQuery = new PostsQuery(pool);
 
+// GET /api/debug - Debug connection string
+router.get('/debug', async (req, res) => {
+  const dbUrl = process.env.DATABASE_URL || 'not set';
+
+  // Mascarar senha para segurança
+  const maskedUrl = dbUrl.replace(/:([^@]+)@/, ':***@');
+
+  res.json({
+    database_url_set: !!process.env.DATABASE_URL,
+    database_url_length: dbUrl.length,
+    database_url_preview: maskedUrl,
+    node_env: process.env.NODE_ENV,
+    is_cloud_db: isCloudDB,
+    ssl_enabled: (process.env.NODE_ENV === 'production' || isCloudDB)
+  });
+});
+
 // GET /api/health - Health check e teste de conexão
 router.get('/health', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW() as time, COUNT(*) as post_count FROM posts');
+  // Extrair host da connection string de forma segura
+  let dbHost = 'unknown';
+  if (process.env.DATABASE_URL) {
+    const match = process.env.DATABASE_URL.match(/@([^:\/]+)/);
+    dbHost = match ? match[1] : 'parse error';
+  }
 
-    // Extrair host da connection string de forma segura
-    let dbHost = 'unknown';
-    if (process.env.DATABASE_URL) {
-      const match = process.env.DATABASE_URL.match(/@([^:\/]+)/);
-      dbHost = match ? match[1] : 'parse error';
-    }
+  try {
+    // Testar com um novo pool temporário para isolar o erro
+    const { Pool: TestPool } = require('pg');
+    const testPool = new TestPool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+
+    const result = await testPool.query('SELECT NOW() as time, COUNT(*) as post_count FROM posts');
+    await testPool.end();
 
     res.json({
       status: 'ok',
@@ -43,17 +68,11 @@ router.get('/health', async (req, res) => {
       database_host: dbHost
     });
   } catch (error) {
-    // Extrair host da connection string de forma segura mesmo em caso de erro
-    let dbHost = 'unknown';
-    if (process.env.DATABASE_URL) {
-      const match = process.env.DATABASE_URL.match(/@([^:\/]+)/);
-      dbHost = match ? match[1] : 'parse error';
-    }
-
     res.status(500).json({
       status: 'error',
       database: 'disconnected',
       error: error.message,
+      stack: error.stack,
       code: error.code,
       database_url_configured: !!process.env.DATABASE_URL,
       database_host: dbHost
