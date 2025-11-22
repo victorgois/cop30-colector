@@ -13,20 +13,30 @@ const isCloudDB = process.env.DATABASE_URL && (
   process.env.DATABASE_URL.includes('supabase.com')
 );
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: (process.env.NODE_ENV === 'production' || isCloudDB)
-    ? { rejectUnauthorized: false }
-    : false,
-  // Força IPv4 para evitar problemas de ENETUNREACH
-  host: process.env.DATABASE_URL ?
-    (() => {
-      const match = process.env.DATABASE_URL.match(/@([^:\/]+)/);
-      return match ? match[1] : undefined;
-    })() : undefined,
-  // Adiciona configuração explícita de família de endereço
-  ...(process.env.NODE_ENV === 'production' && { family: 4 })
-});
+// Configuração de conexão com suporte a IPv4 forçado
+const getPoolConfig = () => {
+  // Se tiver componentes individuais, use-os (evita parsing problemático da URL)
+  if (process.env.PGHOST) {
+    return {
+      host: process.env.PGHOST,
+      port: process.env.PGPORT || 5432,
+      database: process.env.PGDATABASE || 'postgres',
+      user: process.env.PGUSER || 'postgres',
+      password: process.env.PGPASSWORD,
+      ssl: { rejectUnauthorized: false }
+    };
+  }
+
+  // Fallback para connection string
+  return {
+    connectionString: process.env.DATABASE_URL,
+    ssl: (process.env.NODE_ENV === 'production' || isCloudDB)
+      ? { rejectUnauthorized: false }
+      : false
+  };
+};
+
+const pool = new Pool(getPoolConfig());
 
 const postsQuery = new PostsQuery(pool);
 
@@ -57,12 +67,9 @@ router.get('/health', async (req, res) => {
   }
 
   try {
-    // Testar com um novo pool temporário para isolar o erro
+    // Testar com um novo pool temporário usando a mesma config que força IPv4
     const { Pool: TestPool } = require('pg');
-    const testPool = new TestPool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
+    const testPool = new TestPool(getPoolConfig());
 
     const result = await testPool.query('SELECT NOW() as time, COUNT(*) as post_count FROM posts');
     await testPool.end();
