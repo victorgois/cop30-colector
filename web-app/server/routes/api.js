@@ -39,14 +39,20 @@ async function getPool() {
   if (!poolPromise) {
     poolPromise = (async () => {
       const config = await getPoolConfig();
-      console.log('🔧 Configuração do pool:', {
-        host: config.host,
-        port: config.port,
-        database: config.database,
-        user: config.user,
-        ssl: !!config.ssl,
-        connectionString: config.connectionString ? 'presente' : 'ausente'
-      });
+
+      // Log detalhado da connection string para debug
+      if (config.connectionString) {
+        const masked = config.connectionString.replace(/:([^@]+)@/, ':***@');
+        console.log('🔧 Connection String:', masked);
+
+        // Extrair e mostrar o hostname
+        const match = config.connectionString.match(/@([^:]+):(\d+)/);
+        if (match) {
+          console.log('🌐 Hostname extraído:', match[1]);
+          console.log('🔌 Porta:', match[2]);
+        }
+      }
+
       pool = new Pool(config);
       return pool;
     })();
