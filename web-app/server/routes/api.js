@@ -4,7 +4,6 @@ const { Pool } = require('pg');
 const PostsQuery = require('../../../database/queries/posts');
 const fs = require('fs');
 const path = require('path');
-const dns = require('dns').promises;
 
 // Configurar pool de conexão PostgreSQL
 // Detectar se é um serviço de cloud que requer SSL (Render, Supabase, etc)
@@ -14,59 +13,19 @@ const isCloudDB = process.env.DATABASE_URL && (
   process.env.DATABASE_URL.includes('supabase.com')
 );
 
-// Função para resolver hostname para IPv4
-async function resolveToIPv4(hostname) {
-  try {
-    const addresses = await dns.resolve4(hostname);
-    if (addresses && addresses.length > 0) {
-      console.log(`✅ Resolvido ${hostname} para IPv4: ${addresses[0]}`);
-      return addresses[0];
-    }
-  } catch (error) {
-    console.error(`❌ Erro ao resolver ${hostname}:`, error.message);
-  }
-  return hostname; // Fallback para o hostname original
-}
-
-// Configuração de conexão com suporte a IPv4 forçado
+// Configuração de conexão simplificada
 const getPoolConfig = async () => {
-  // Se tiver componentes individuais, use-os (evita parsing problemático da URL)
-  if (process.env.PGHOST) {
-    const ipv4Host = await resolveToIPv4(process.env.PGHOST);
-    return {
-      host: ipv4Host,
-      port: process.env.PGPORT || 5432,
-      database: process.env.PGDATABASE || 'postgres',
-      user: process.env.PGUSER || 'postgres',
-      password: process.env.PGPASSWORD,
-      ssl: { rejectUnauthorized: false }
-    };
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL não configurada');
   }
 
-  // Fallback para connection string - tentar extrair e resolver o host
-  if (process.env.DATABASE_URL) {
-    const match = process.env.DATABASE_URL.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/);
-    if (match) {
-      const [, user, password, hostname, port, database] = match;
-      const ipv4Host = await resolveToIPv4(hostname);
+  console.log('📝 Usando DATABASE_URL do Supabase Pooler');
 
-      return {
-        host: ipv4Host,
-        port: parseInt(port),
-        database: database,
-        user: user,
-        password: password,
-        ssl: { rejectUnauthorized: false }
-      };
-    }
-  }
-
-  // Fallback final
   return {
     connectionString: process.env.DATABASE_URL,
-    ssl: (process.env.NODE_ENV === 'production' || isCloudDB)
-      ? { rejectUnauthorized: false }
-      : false
+    ssl: {
+      rejectUnauthorized: false
+    }
   };
 };
 
@@ -80,6 +39,14 @@ async function getPool() {
   if (!poolPromise) {
     poolPromise = (async () => {
       const config = await getPoolConfig();
+      console.log('🔧 Configuração do pool:', {
+        host: config.host,
+        port: config.port,
+        database: config.database,
+        user: config.user,
+        ssl: !!config.ssl,
+        connectionString: config.connectionString ? 'presente' : 'ausente'
+      });
       pool = new Pool(config);
       return pool;
     })();
