@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 const PostsQuery = require('../../../database/queries/posts');
 const fs = require('fs');
 const path = require('path');
+const dns = require('dns').promises;
 
 // Configurar pool de conexão PostgreSQL
 // Detectar se é um serviço de cloud que requer SSL (Render, Supabase, etc)
@@ -13,12 +14,27 @@ const isCloudDB = process.env.DATABASE_URL && (
   process.env.DATABASE_URL.includes('supabase.com')
 );
 
+// Função para resolver hostname para IPv4
+async function resolveToIPv4(hostname) {
+  try {
+    const addresses = await dns.resolve4(hostname);
+    if (addresses && addresses.length > 0) {
+      console.log(`✅ Resolvido ${hostname} para IPv4: ${addresses[0]}`);
+      return addresses[0];
+    }
+  } catch (error) {
+    console.error(`❌ Erro ao resolver ${hostname}:`, error.message);
+  }
+  return hostname; // Fallback para o hostname original
+}
+
 // Configuração de conexão com suporte a IPv4 forçado
-const getPoolConfig = () => {
+const getPoolConfig = async () => {
   // Se tiver componentes individuais, use-os (evita parsing problemático da URL)
   if (process.env.PGHOST) {
+    const ipv4Host = await resolveToIPv4(process.env.PGHOST);
     return {
-      host: process.env.PGHOST,
+      host: ipv4Host,
       port: process.env.PGPORT || 5432,
       database: process.env.PGDATABASE || 'postgres',
       user: process.env.PGUSER || 'postgres',
@@ -27,7 +43,25 @@ const getPoolConfig = () => {
     };
   }
 
-  // Fallback para connection string
+  // Fallback para connection string - tentar extrair e resolver o host
+  if (process.env.DATABASE_URL) {
+    const match = process.env.DATABASE_URL.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/);
+    if (match) {
+      const [, user, password, hostname, port, database] = match;
+      const ipv4Host = await resolveToIPv4(hostname);
+
+      return {
+        host: ipv4Host,
+        port: parseInt(port),
+        database: database,
+        user: user,
+        password: password,
+        ssl: { rejectUnauthorized: false }
+      };
+    }
+  }
+
+  // Fallback final
   return {
     connectionString: process.env.DATABASE_URL,
     ssl: (process.env.NODE_ENV === 'production' || isCloudDB)
@@ -36,9 +70,34 @@ const getPoolConfig = () => {
   };
 };
 
-const pool = new Pool(getPoolConfig());
+// Pool será inicializado de forma lazy (na primeira consulta)
+let pool = null;
+let poolPromise = null;
 
-const postsQuery = new PostsQuery(pool);
+async function getPool() {
+  if (pool) return pool;
+
+  if (!poolPromise) {
+    poolPromise = (async () => {
+      const config = await getPoolConfig();
+      pool = new Pool(config);
+      return pool;
+    })();
+  }
+
+  return poolPromise;
+}
+
+// PostsQuery será inicializado junto com o pool
+let postsQuery = null;
+
+async function getPostsQuery() {
+  if (postsQuery) return postsQuery;
+
+  const poolInstance = await getPool();
+  postsQuery = new PostsQuery(poolInstance);
+  return postsQuery;
+}
 
 // GET /api/debug - Debug connection string
 router.get('/debug', async (req, res) => {
@@ -53,7 +112,15 @@ router.get('/debug', async (req, res) => {
     database_url_preview: maskedUrl,
     node_env: process.env.NODE_ENV,
     is_cloud_db: isCloudDB,
-    ssl_enabled: (process.env.NODE_ENV === 'production' || isCloudDB)
+    ssl_enabled: (process.env.NODE_ENV === 'production' || isCloudDB),
+    pg_individual_vars: {
+      PGHOST: process.env.PGHOST || 'not set',
+      PGPORT: process.env.PGPORT || 'not set',
+      PGDATABASE: process.env.PGDATABASE || 'not set',
+      PGUSER: process.env.PGUSER || 'not set',
+      PGPASSWORD: process.env.PGPASSWORD ? '***set***' : 'not set'
+    },
+    pool_config_type: process.env.PGHOST ? 'individual_vars' : 'connection_string'
   });
 });
 
@@ -67,12 +134,9 @@ router.get('/health', async (req, res) => {
   }
 
   try {
-    // Testar com um novo pool temporário usando a mesma config que força IPv4
-    const { Pool: TestPool } = require('pg');
-    const testPool = new TestPool(getPoolConfig());
-
-    const result = await testPool.query('SELECT NOW() as time, COUNT(*) as post_count FROM posts');
-    await testPool.end();
+    // Usar o pool principal que já resolve para IPv4
+    const poolInstance = await getPool();
+    const result = await poolInstance.query('SELECT NOW() as time, COUNT(*) as post_count FROM posts');
 
     res.json({
       status: 'ok',
@@ -108,7 +172,8 @@ router.get('/posts', async (req, res) => {
       limit: parseInt(limit) || 100
     };
 
-    const posts = await postsQuery.getPosts(filters);
+    const query = await getPostsQuery();
+    const posts = await query.getPosts(filters);
     res.json(posts);
   } catch (error) {
     console.error('Erro ao buscar posts:', error);
@@ -121,7 +186,8 @@ router.get('/stats', async (req, res) => {
   try {
     console.log('[API] Buscando estatísticas...');
     console.log('[API] DATABASE_URL configurada:', !!process.env.DATABASE_URL);
-    const stats = await postsQuery.getStats();
+    const query = await getPostsQuery();
+    const stats = await query.getStats();
     console.log('[API] Estatísticas encontradas:', stats.length, 'registros');
     res.json(stats);
   } catch (error) {
@@ -138,7 +204,8 @@ router.get('/stats', async (req, res) => {
 router.get('/timeline', async (req, res) => {
   try {
     const { granularity, platform } = req.query;
-    const timeline = await postsQuery.getTimeline(granularity || 'day', platform);
+    const query = await getPostsQuery();
+    const timeline = await query.getTimeline(granularity || 'day', platform);
     res.json(timeline);
   } catch (error) {
     console.error('Erro ao buscar timeline:', error);
@@ -150,7 +217,8 @@ router.get('/timeline', async (req, res) => {
 router.get('/hashtags', async (req, res) => {
   try {
     const { limit, platform } = req.query;
-    const hashtags = await postsQuery.getTopHashtags(parseInt(limit) || 50, platform);
+    const query = await getPostsQuery();
+    const hashtags = await query.getTopHashtags(parseInt(limit) || 50, platform);
     res.json(hashtags);
   } catch (error) {
     console.error('Erro ao buscar hashtags:', error);
@@ -162,7 +230,8 @@ router.get('/hashtags', async (req, res) => {
 router.get('/top-posts', async (req, res) => {
   try {
     const { metric, limit } = req.query;
-    const topPosts = await postsQuery.getTopPosts(metric || 'likes_count', parseInt(limit) || 20);
+    const query = await getPostsQuery();
+    const topPosts = await query.getTopPosts(metric || 'likes_count', parseInt(limit) || 20);
     res.json(topPosts);
   } catch (error) {
     console.error('Erro ao buscar top posts:', error);
@@ -191,7 +260,8 @@ router.get('/users/influential', async (req, res) => {
       LIMIT $1
     `;
 
-    const result = await pool.query(query, [parseInt(limit) || 30]);
+    const poolInstance = await getPool();
+    const result = await poolInstance.query(query, [parseInt(limit) || 30]);
     res.json(result.rows);
   } catch (error) {
     console.error('Erro ao buscar usuários influentes:', error);
@@ -203,9 +273,10 @@ router.get('/users/influential', async (req, res) => {
 router.get('/hashtag-network', async (req, res) => {
   try {
     const { minCoOccurrence } = req.query;
+    const query = await getPostsQuery();
 
-    const links = await postsQuery.getHashtagNetwork(parseInt(minCoOccurrence) || 3);
-    const nodes = await postsQuery.getHashtagStats(50);
+    const links = await query.getHashtagNetwork(parseInt(minCoOccurrence) || 3);
+    const nodes = await query.getHashtagStats(50);
 
     res.json({
       nodes: nodes.map(n => ({
@@ -232,7 +303,8 @@ router.get('/hashtag-network', async (req, res) => {
 router.get('/latency-analysis', async (req, res) => {
   try {
     const { platform } = req.query;
-    const data = await postsQuery.getLatencyAnalysis(platform);
+    const query = await getPostsQuery();
+    const data = await query.getLatencyAnalysis(platform);
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar análise de latência:', error);
@@ -244,7 +316,8 @@ router.get('/latency-analysis', async (req, res) => {
 router.get('/collection-history', async (req, res) => {
   try {
     const { limit } = req.query;
-    const data = await postsQuery.getCollectionHistory(parseInt(limit) || 50);
+    const query = await getPostsQuery();
+    const data = await query.getCollectionHistory(parseInt(limit) || 50);
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar histórico de coletas:', error);
@@ -256,7 +329,8 @@ router.get('/collection-history', async (req, res) => {
 router.get('/likes-timeline', async (req, res) => {
   try {
     const { platform } = req.query;
-    const data = await postsQuery.getLikesTimeline(platform);
+    const query = await getPostsQuery();
+    const data = await query.getLikesTimeline(platform);
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar timeline de likes:', error);
@@ -285,7 +359,8 @@ router.get('/update-timeline', async (req, res) => {
       ORDER BY date DESC;
     `;
 
-    await pool.query(query);
+    const poolInstance = await getPool();
+    await poolInstance.query(query);
 
     console.log('✅ View daily_timeline atualizada!');
 
@@ -309,7 +384,8 @@ router.get('/update-timeline', async (req, res) => {
 router.get('/influencers', async (req, res) => {
   try {
     const { limit } = req.query;
-    const data = await postsQuery.getTopInfluencers(limit ? parseInt(limit) : 20);
+    const query = await getPostsQuery();
+    const data = await query.getTopInfluencers(limit ? parseInt(limit) : 20);
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar influenciadores:', error);
@@ -320,7 +396,8 @@ router.get('/influencers', async (req, res) => {
 // GET /api/platform-comparison - Comparativo entre plataformas
 router.get('/platform-comparison', async (req, res) => {
   try {
-    const data = await postsQuery.getPlatformComparison();
+    const query = await getPostsQuery();
+    const data = await query.getPlatformComparison();
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar comparativo de plataformas:', error);
@@ -331,7 +408,8 @@ router.get('/platform-comparison', async (req, res) => {
 // GET /api/content-performance - Análise de performance de conteúdo
 router.get('/content-performance', async (req, res) => {
   try {
-    const data = await postsQuery.getContentPerformance();
+    const query = await getPostsQuery();
+    const data = await query.getContentPerformance();
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar performance de conteúdo:', error);
@@ -343,7 +421,8 @@ router.get('/content-performance', async (req, res) => {
 router.get('/engagement-distribution', async (req, res) => {
   try {
     const { platform } = req.query;
-    const data = await postsQuery.getEngagementDistribution(platform);
+    const query = await getPostsQuery();
+    const data = await query.getEngagementDistribution(platform);
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar distribuição de engajamento:', error);
@@ -355,7 +434,8 @@ router.get('/engagement-distribution', async (req, res) => {
 router.get('/temporal-activity', async (req, res) => {
   try {
     const { platform } = req.query;
-    const data = await postsQuery.getTemporalActivity(platform);
+    const query = await getPostsQuery();
+    const data = await query.getTemporalActivity(platform);
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar atividade temporal:', error);
@@ -371,7 +451,8 @@ router.get('/hashtag-evolution', async (req, res) => {
       return res.status(400).json({ error: 'Parâmetro hashtags é obrigatório' });
     }
     const hashtagArray = hashtags.split(',').map(h => h.trim().toLowerCase().replace('#', ''));
-    const data = await postsQuery.getHashtagEvolution(hashtagArray, platform);
+    const query = await getPostsQuery();
+    const data = await query.getHashtagEvolution(hashtagArray, platform);
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar evolução de hashtags:', error);
@@ -383,7 +464,8 @@ router.get('/hashtag-evolution', async (req, res) => {
 router.get('/emerging-hashtags', async (req, res) => {
   try {
     const { limit } = req.query;
-    const data = await postsQuery.getEmergingHashtags(limit ? parseInt(limit) : 20);
+    const query = await getPostsQuery();
+    const data = await query.getEmergingHashtags(limit ? parseInt(limit) : 20);
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar hashtags emergentes:', error);
@@ -395,7 +477,8 @@ router.get('/emerging-hashtags', async (req, res) => {
 router.get('/narrative-analysis', async (req, res) => {
   try {
     const { platform } = req.query;
-    const data = await postsQuery.getNarrativeAnalysis(platform);
+    const query = await getPostsQuery();
+    const data = await query.getNarrativeAnalysis(platform);
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar análise de narrativas:', error);
@@ -407,7 +490,8 @@ router.get('/narrative-analysis', async (req, res) => {
 router.get('/top-words', async (req, res) => {
   try {
     const { limit, platform } = req.query;
-    const data = await postsQuery.getTopWords(limit ? parseInt(limit) : 50, platform);
+    const query = await getPostsQuery();
+    const data = await query.getTopWords(limit ? parseInt(limit) : 50, platform);
     res.json(data);
   } catch (error) {
     console.error('Erro ao buscar palavras mais usadas:', error);
@@ -420,6 +504,8 @@ router.get('/setup', async (req, res) => {
   try {
     console.log('🔄 Iniciando setup do banco de dados...');
 
+    const poolInstance = await getPool();
+
     // Verificar se já foi inicializado
     const checkQuery = `
       SELECT EXISTS (
@@ -429,7 +515,7 @@ router.get('/setup', async (req, res) => {
       ) as exists;
     `;
 
-    const checkResult = await pool.query(checkQuery);
+    const checkResult = await poolInstance.query(checkQuery);
 
     if (checkResult.rows[0].exists) {
       return res.json({
@@ -445,7 +531,7 @@ router.get('/setup', async (req, res) => {
     const schema = fs.readFileSync(schemaPath, 'utf8');
 
     console.log('📄 Executando schema.sql...');
-    await pool.query(schema);
+    await poolInstance.query(schema);
 
     console.log('✅ Banco de dados inicializado com sucesso!');
 
