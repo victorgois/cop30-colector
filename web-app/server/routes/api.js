@@ -137,12 +137,16 @@ router.get('/posts', async (req, res) => {
   try {
     const { platform, keyword, start_date, end_date, limit } = req.query;
 
+    // Limitar o máximo para 10000 para evitar sobrecarga
+    const requestedLimit = parseInt(limit) || 100;
+    const safeLimit = Math.min(requestedLimit, 10000);
+
     const filters = {
       platform,
       keyword,
       start_date,
       end_date,
-      limit: parseInt(limit) || 100
+      limit: safeLimit
     };
 
     const query = await getPostsQuery();

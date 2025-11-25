@@ -27,7 +27,7 @@ async function exportData(format, fullExport = false) {
     statusDiv.innerHTML = '<p style="margin: 0; color: #666;">Preparando download...</p>';
 
     // Coletar filtros
-    const filters = fullExport ? { limit: 999999 } : {
+    const filters = fullExport ? { limit: 10000 } : {
       platform: document.getElementById('export-platform').value,
       start_date: document.getElementById('export-date-from').value,
       end_date: document.getElementById('export-date-to').value,
