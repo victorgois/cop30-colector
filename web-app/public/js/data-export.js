@@ -26,22 +26,51 @@ async function exportData(format, fullExport = false) {
     statusDiv.style.display = 'block';
     statusDiv.innerHTML = '<p style="margin: 0; color: #666;">Preparando download...</p>';
 
-    // Coletar filtros
-    const filters = fullExport ? { limit: 10000 } : {
-      platform: document.getElementById('export-platform').value,
-      start_date: document.getElementById('export-date-from').value,
-      end_date: document.getElementById('export-date-to').value,
-      keyword: document.getElementById('export-keyword').value,
-      limit: document.getElementById('export-limit').value
-    };
+    let data = [];
 
-    // Remover filtros vazios (exceto limit para full export)
-    Object.keys(filters).forEach(key => {
-      if (!filters[key] && !(fullExport && key === 'limit')) delete filters[key];
-    });
+    if (fullExport) {
+      // Para exportação completa, buscar em lotes para evitar sobrecarga
+      statusDiv.innerHTML = '<p style="margin: 0; color: #666;">Baixando dados em lotes...</p>';
 
-    // Buscar dados
-    const data = await apiClient.getPosts(filters);
+      const batchSize = 1000;
+      let offset = 0;
+      let hasMore = true;
+
+      while (hasMore) {
+        const batch = await apiClient.getPosts({ limit: batchSize, offset: offset });
+
+        if (batch.length === 0) {
+          hasMore = false;
+        } else {
+          data = data.concat(batch);
+          offset += batchSize;
+
+          // Atualizar progresso
+          statusDiv.innerHTML = `<p style="margin: 0; color: #666;">Baixados ${data.length} posts...</p>`;
+
+          // Se retornou menos que o batch size, não há mais dados
+          if (batch.length < batchSize) {
+            hasMore = false;
+          }
+        }
+      }
+    } else {
+      // Para exportação com filtros, usar o método normal
+      const filters = {
+        platform: document.getElementById('export-platform').value,
+        start_date: document.getElementById('export-date-from').value,
+        end_date: document.getElementById('export-date-to').value,
+        keyword: document.getElementById('export-keyword').value,
+        limit: document.getElementById('export-limit').value
+      };
+
+      // Remover filtros vazios
+      Object.keys(filters).forEach(key => {
+        if (!filters[key]) delete filters[key];
+      });
+
+      data = await apiClient.getPosts(filters);
+    }
 
     if (!data || data.length === 0) {
       statusDiv.innerHTML = '<p style="margin: 0; color: #ff6b6b;">Nenhum dado encontrado com os filtros selecionados.</p>';

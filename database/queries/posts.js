@@ -74,7 +74,12 @@ class PostsQuery {
       paramCount++;
     }
 
-    query += ` ORDER BY created_at DESC LIMIT ${filters.limit || 100}`;
+    query += ` ORDER BY created_at DESC`;
+    query += ` LIMIT ${filters.limit || 100}`;
+
+    if (filters.offset) {
+      query += ` OFFSET ${filters.offset}`;
+    }
 
     const result = await this.pool.query(query, values);
     return result.rows;

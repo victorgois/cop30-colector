@@ -135,18 +135,19 @@ router.get('/health', async (req, res) => {
 // GET /api/posts - Lista posts com filtros
 router.get('/posts', async (req, res) => {
   try {
-    const { platform, keyword, start_date, end_date, limit } = req.query;
+    const { platform, keyword, start_date, end_date, limit, offset } = req.query;
 
-    // Limitar o máximo para 10000 para evitar sobrecarga
+    // Limitar o máximo para 5000 para evitar sobrecarga em uma única requisição
     const requestedLimit = parseInt(limit) || 100;
-    const safeLimit = Math.min(requestedLimit, 10000);
+    const safeLimit = Math.min(requestedLimit, 5000);
 
     const filters = {
       platform,
       keyword,
       start_date,
       end_date,
-      limit: safeLimit
+      limit: safeLimit,
+      offset: parseInt(offset) || 0
     };
 
     const query = await getPostsQuery();
