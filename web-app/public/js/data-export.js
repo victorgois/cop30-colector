@@ -37,11 +37,18 @@ async function exportData(format, fullExport = false) {
       let hasMore = true;
 
       while (hasMore) {
-        const batch = await apiClient.getPosts({ limit: batchSize, offset: offset });
+        try {
+          console.log(`Buscando lote: offset=${offset}, limit=${batchSize}`);
+          const batch = await apiClient.getPosts({ limit: batchSize, offset: offset });
+          console.log(`Lote recebido: ${batch ? batch.length : 0} posts`);
 
-        if (batch.length === 0) {
-          hasMore = false;
-        } else {
+          // Se não há dados ou array vazio, parar
+          if (!batch || batch.length === 0) {
+            console.log('Nenhum dado retornado, finalizando...');
+            hasMore = false;
+            break;
+          }
+
           data = data.concat(batch);
           offset += batchSize;
 
@@ -50,10 +57,20 @@ async function exportData(format, fullExport = false) {
 
           // Se retornou menos que o batch size, não há mais dados
           if (batch.length < batchSize) {
+            console.log(`Último lote: ${batch.length} posts (menos que ${batchSize})`);
             hasMore = false;
+          }
+        } catch (error) {
+          console.error('Erro ao buscar lote:', error);
+          hasMore = false;
+          // Se já temos dados, continue com o que foi baixado
+          if (data.length === 0) {
+            throw error; // Se não temos nenhum dado, propague o erro
           }
         }
       }
+
+      console.log(`Download completo: ${data.length} posts no total`);
     } else {
       // Para exportação com filtros, usar o método normal
       const filters = {
