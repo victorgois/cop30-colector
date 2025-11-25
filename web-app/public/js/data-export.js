@@ -27,7 +27,7 @@ async function exportData(format, fullExport = false) {
     statusDiv.innerHTML = '<p style="margin: 0; color: #666;">Preparando download...</p>';
 
     // Coletar filtros
-    const filters = fullExport ? {} : {
+    const filters = fullExport ? { limit: 999999 } : {
       platform: document.getElementById('export-platform').value,
       start_date: document.getElementById('export-date-from').value,
       end_date: document.getElementById('export-date-to').value,
@@ -35,9 +35,9 @@ async function exportData(format, fullExport = false) {
       limit: document.getElementById('export-limit').value
     };
 
-    // Remover filtros vazios
+    // Remover filtros vazios (exceto limit para full export)
     Object.keys(filters).forEach(key => {
-      if (!filters[key]) delete filters[key];
+      if (!filters[key] && !(fullExport && key === 'limit')) delete filters[key];
     });
 
     // Buscar dados
