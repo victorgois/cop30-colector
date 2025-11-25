@@ -20,6 +20,7 @@ logs/
 # Database
 *.sql.backup
 *.db
+backups/
 
 # IDE
 .vscode/
