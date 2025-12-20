@@ -241,22 +241,40 @@ Gráfico de barras dos posts com maior engajamento (likes, comentários, compart
 - Média de engajamento
 - Última coleta realizada
 
+## 📊 Estatísticas do Dataset
+
+**Período do Dataset:** Novembro a Dezembro de 2025
+
+- **Total de Posts:** 7.187
+- **Hashtags Únicas:** 33.343
+- **Registros na Timeline:** 650
+- **Tamanho do Banco:** 98 MB
+
+**Distribuição por Mês:**
+- Novembro/2025: 6.934 posts (96.5%)
+- Dezembro/2025: 253 posts (3.5%)
+
+**Distribuição por Plataforma:**
+- Instagram: [consultar API]
+- TikTok: [consultar API]
+
 ## 📅 Cronograma do Projeto
 
 ### Fase 1: Desenvolvimento (Outubro 2025)
 - ✅ Arquitetura e configuração da infraestrutura
 - ✅ Desenvolvimento do sistema de coleta
-- ⏳ Testes e ajustes
+- ✅ Testes e ajustes
 
 ### Fase 2: Coleta (Novembro 2025)
-- ⏳ Coleta automatizada contínua (30 dias)
-- ⏳ Monitoramento diário
-- ⏳ Backup e validação
+- ✅ Coleta automatizada contínua (30 dias)
+- ✅ Monitoramento diário
+- ✅ Backup e validação
 
 ### Fase 3: Análise (Dezembro 2025)
-- ⏳ Análise dos dados
-- ⏳ Refinamento das visualizações
-- ⏳ Documentação final
+- ✅ Análise dos dados
+- ✅ Refinamento das visualizações
+- ✅ Documentação final
+- ✅ Limpeza e otimização do dataset
 
 ## 🔒 Considerações Éticas
 
